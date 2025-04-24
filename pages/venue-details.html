@@ -1,0 +1,98 @@
+<template>
+    <div class="page" data-name="venue-details">
+        <!-- Navbar -->
+        <div class="navbar">
+            <div class="navbar-bg"></div>
+            <div class="navbar-inner">
+                <div class="left">
+                    <a href="#" class="link back">
+                        <i class="icon f7-icons">arrow_left</i>
+                    </a>
+                </div>
+                <div class="title">Venue Details</div>
+                <div class="right">
+                    <!-- Add the popover-open class and data-popover attribute -->
+                    <a href="#" class="link add-image popover-open" data-popover=".popover-add-image"
+                        style="display: none;">
+                        <i class="icon f7-icons">plus_rectangle</i> Image
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-content">
+            <div class="block">
+                <div class="line">
+                    <hr class="divider" />
+                </div>
+                <!-- Venue Image Slider -->
+                <swiper-container pagination class="demo-swiper-multiple" space-between="50">
+                </swiper-container>
+                <div class="line">
+                    <hr class="divider" />
+                </div>
+            </div>
+
+            <!-- Venue Description -->
+            <div class="block">
+                <p class="venue-description text-align-center"></p>
+                <p class="venue-capacity text-align-center"></p>
+                <p class="venue-pricing text-align-center"></p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="block">
+                <a class="button button-round button-raised button-outline all-venue-events">All Events</a>
+                <a class="button button-round button-raised button-tonal edit-venue"
+                    style="display: none; margin-top: 15px;"><i class="icon f7-icons">pencil</i>
+                    Edit</a>
+                <a class="button button-round button-raised delete-venue"
+                    style="display: none; background-color: rgb(255, 91, 91); color: #ddd; margin-top: 15px;"><i
+                        class="icon f7-icons">trash</i> Delete</a>
+                <a class="button button-round button-raised button-fill add-event" style="margin-top: 15px;">Add My Event</a>
+            </div>
+        </div>
+
+        <!-- Bottom Toolbar -->
+
+
+        <!-- Popover for Image Upload -->
+        <div class="popover popover-add-image">
+            <div class="popover-inner">
+                <div class="block">
+                    <form id="imageUploadForm" enctype="multipart/form-data">
+                        <div class="list">
+                            <ul>
+                                <li class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-title item-label">Select Image</div>
+                                        <div class="item-input-wrap">
+                                            <input type="file" accept="image/*" id="imageFile" name="imageFile" validate
+                                                required />
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-input-wrap">
+                                            <img id="imagePreview" src="" alt="Image Preview"
+                                                style="max-width: 100%; display: none;" />
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-input-wrap block-footer">
+                                            <button type="submit" class="button button-raised"><i
+                                                    class="icon f7-icons">plus</i> Add</button>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

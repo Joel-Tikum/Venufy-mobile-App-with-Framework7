@@ -1,0 +1,82 @@
+<template>
+  <div class="page" data-name="edit-profile">
+    <!-- Navbar -->
+    <div class="navbar">
+      <div class="navbar-bg"></div>
+      <div class="navbar-inner">
+        <div class="left">
+          <a href="#" class="link back">
+            <i class="icon f7-icons">arrow_left</i>
+          </a>
+        </div>
+        <div class="title">Edit Profile</div>
+      </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="page-content">
+      <form class="edit-profile-form" enctype="multipart/form-data">
+        <!-- Hidden File Input -->
+        <input type="file" id="profilePic" accept="image/*" style="display: none;" />
+
+        <!-- Avatar (wrapped in label to open file picker) -->
+        <div class="block text-align-center">
+          <label for="profilePic" class="position-relative" style="display: inline-block; cursor: pointer;">
+            <img class="user-photo" style="width: 200px; height: 200px; border: 2px solid #3333; border-radius: 50%;"
+              alt="Profile Avatar" />
+            <div class="position-absolute" style="bottom: 0; right: 0;">
+              <i class="icon f7-icons">camera_fill</i>
+            </div>
+          </label>
+        </div>
+
+        <!-- Form -->
+        <div class="list form-list inset">
+          <ul>
+            <li class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-floating-label">First Name</div>
+                <div class="item-input-wrap">
+                  <input type="text" id="fname" validate required />
+                  <span class="input-clear-button"></span>
+                </div>
+              </div>
+            </li>
+            <li class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-floating-label">Last Name</div>
+                <div class="item-input-wrap">
+                  <input type="text" id="lname" validate required />
+                  <span class="input-clear-button"></span>
+                </div>
+              </div>
+            </li>
+            <li class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-floating-label">Email Address</div>
+                <div class="item-input-wrap">
+                  <input type="email" id="email" validate required />
+                  <span class="input-clear-button"></span>
+                </div>
+              </div>
+            </li>
+            <li class="item-content item-input last">
+              <div class="item-inner">
+                <div class="item-title item-floating-label">Contact</div>
+                <div class="item-input-wrap">
+                  <input type="number" id="contact" validate required />
+                  <span class="input-clear-button"></span>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Save Button -->
+        <div class="block">
+          <button type="submit" class="button button-fill button-large">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>

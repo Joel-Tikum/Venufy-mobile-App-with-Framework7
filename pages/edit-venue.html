@@ -1,0 +1,93 @@
+<template>
+    <div class="page" data-name="edit-venue">
+
+        <!-- Navbar -->
+        <div class="navbar">
+            <div class="navbar-bg"></div>
+            <div class="navbar-inner">
+                <div class="left">
+                    <a href="#" class="link back"><i class="icon icon-back"></i></a>
+                </div>
+                <div class="title">
+                    <p>Edit Your Venue</p>
+                </div>
+                <div class="right">
+                    <a href="/profile/" class="link">
+                        <i class="icon f7-icons">person_circle</i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-content">
+            <!-- Information Text -->
+            <p class="block text-align-center" style="font-size: 17px;">
+                Submitting your venue details to Venufy helps improve your visibility and provide more business
+                opportunities.
+              </p>
+
+            <!-- Create Venue Form -->
+            <form class="venue-edit-form">
+                <div class="list">
+                    <ul>
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-floating-label">Venue Name</div>
+                                <div class="item-input-wrap">
+                                    <input type="text" class="name" required validate />
+                                    
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-floating-label">Address</div>
+                                <div class="item-input-wrap">
+                                    <input type="text" class="address" required validate />
+                                    
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-floating-label">Capacity</div>
+                                <div class="item-input-wrap">
+                                    <input type="text" class="capacity" required validate />
+                                    
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-floating-label">Pricing (XAF)</div>
+                                <div class="item-input-wrap">
+                                    <input type="text" class="pricing" required validate />
+                                    
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-floating-label">Description</div>
+                                <div class="item-input-wrap">
+                                    <input type="text" class="description" required validate />
+                                    
+                                </div>
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+
+                <!-- Buttons -->
+                <div class="block">
+                    <button type="submit" class="button button-round button-fill">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>

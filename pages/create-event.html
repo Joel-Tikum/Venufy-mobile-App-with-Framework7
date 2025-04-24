@@ -1,0 +1,80 @@
+<template>
+    <div class="page" data-name="create-event">
+
+        <!-- Navbar -->
+        <div class="navbar">
+            <div class="navbar-bg"></div>
+            <div class="navbar-inner">
+                <div class="left">
+                    <a href="#" class="link back"><i class="icon icon-back"></i></a>
+                </div>
+                <div class="title">
+                    <p>Create Event Page</p>
+                </div>
+                <div class="right">
+                    <a href="/profile/" class="link">
+                        <i class="icon f7-icons">person_circle</i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-content">
+            <!-- Information Text -->
+            <div class="block text-align-center">
+                <p class="form-title" style="font-size: 17px;"></p>
+            </div>
+
+            <!-- Create Venue Form -->
+            <form class="create-event-form">
+                <div class="list">
+                    <ul>
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-floating-label">Event Title </div>
+                                <div class="item-input-wrap">
+                                    <input type="text" class="event-title" required validate />
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-floating-label">Description</div>
+                                <div class="item-input-wrap">
+                                    <input type="text" class="event-description" required validate />
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-floating-label">Select Date</div>
+                                <div class="item-input-wrap" id="open-calendar" style="display: flex; justify-content: space-between;">
+                                    <input type="text" class="event-date" id="date-picker" placeholder="DD/MM/YYYY" readonly required />
+                                    <i class="icon f7-icons calendar-icon">calendar</i>
+                                </div>
+                            </div>
+                        </li>
+
+
+                    </ul>
+                </div>
+
+                <!-- Information Text -->
+                <div class="block text-align-center">
+                    <p style="font-size: 17px;">
+                        Venufy has you covered and will notify you once all is set.
+                    </p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="block">
+                    <button type="submit" class="button button-raised button-fill button-round">Create Event</button>
+                </div>
+            </form>
+        </div>
+
+
+    </div>
+</template>

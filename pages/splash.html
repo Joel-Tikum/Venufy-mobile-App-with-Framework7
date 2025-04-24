@@ -1,0 +1,24 @@
+<div class="page no-navbar no-toolbar bg-color-blue" data-name="splash">
+  <!-- 
+    .page-content with flex classes to center 
+    the logo both vertically and horizontally 
+  -->
+  <div class="page-content display-flex flex-direction-column justify-content-center align-items-center">
+    <!-- Your splash logo -->
+    <img src="/venufy/assets/logo.png" alt="Venufy Logo" class="display-block" style="width: 25vw; height: 15vh;"/>
+  </div>
+</div>
+
+<style>
+ /* Set up a fade transition on the splash screen container */
+.splash-fade {
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+/* When visible, the element has full opacity */
+.splash-fade.visible {
+  opacity: 1;
+}
+
+</style>

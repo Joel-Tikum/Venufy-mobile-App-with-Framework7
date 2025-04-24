@@ -1,0 +1,86 @@
+<div class="page" data-name="all-events">
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="navbar-bg"></div>
+        <div class="navbar-inner">
+            <a href="#" class="link icon-only panel-open" data-panel="left">
+                <i class="icon f7-icons if-not-md">menu</i>
+                <i class="icon material-icons if-md">menu</i>
+            </a>
+            <div class="title" style="margin-left: 20%;">Event Listing</div>
+            <!-- Optional right icon, e.g. a search button -->
+            <div class="right">
+                <a href="#" class="link icon-only">
+                    <i class="f7-icons">search</i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="page-content" style="padding-bottom: 60px;">
+        <!-- Search Bar (if you want an inline search) -->
+        <form class="searchbar searchbar-init">
+            <div class="searchbar-inner">
+                <div class="searchbar-input-wrap">
+                    <input type="search" placeholder="Find Venue..." />
+                    <i class="searchbar-icon"></i>
+                </div>
+                <span class="searchbar-disable-button if-not-aurora">Cancel</span>
+            </div>
+        </form>
+
+        <!-- Segmented Control for filtering categories -->
+        <div class="block" style="margin: 0px;">
+            <div class="segmented segmented-round">
+                <a href="#all-events" class="button tab-link tab-link-active">Upcoming</a>
+                <a href="#pending-events" class="button tab-link">Pending</a>
+                <a href="#past-events" class="button tab-link">Past events</a>
+            </div>
+            <hr class="divider" />
+        </div>
+
+        <!-- Tabs container -->
+        <div class="tabs" >
+            <!-- Tab for All events -->
+            <div id="all-events" class="tab tab-active">
+                <div class="block no-item-all"><b>No items listed !</b></div>
+            </div>
+
+            <!-- Tab for Pending events -->
+            <div id="pending-events" class="tab">
+                <div class="block no-item-pending"><b>No items listed !</b></div>
+            </div>
+
+            <!-- Tab for Past events -->
+            <div id="past-events" class="tab">
+                <div class="block no-item-past"><b>No items listed !</b></div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Toolbar (bottom) -->
+    <div class="toolbar toolbar-bottom">
+        <div class="toolbar-inner flex justify-content-between overflow-hidden">
+            <a href="/home/" class="link flex flex-direction-column align-items-center">
+                <i class="f7-icons">house</i>
+                <span style="line-height: 15px;">Home</span>
+            </a>
+            <a href="/all-events/" class="link flex flex-direction-column align-items-center color-blue">
+                <i class="f7-icons">calendar</i>
+                <span style="line-height: 15px;">Events</span>
+            </a>
+            <a href="/notifications/" class="link flex flex-direction-column align-items-center">
+                <i class="f7-icons">bell</i>
+                <span style="line-height: 15px;">Notifications</span>
+            </a>
+            <a href="/profile/" class="link flex flex-direction-column align-items-center">
+                <i class="f7-icons">person</i>
+                <span style="line-height: 15px;">Profile</span>
+            </a>
+        </div>
+    </div>
+
+</div>
