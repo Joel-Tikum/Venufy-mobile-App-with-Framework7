@@ -72,12 +72,13 @@ let userData;
 let userPhotoPath;
 $(document).on('page:init', async function (e, page) {
 
-  currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-  userID = currentUser.userId;
-
+  currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  userID = currentUser ? currentUser.userId : null;
+  // Check if the user is logged in
+  
   userData = await fetchUserById(userID);
   userPhotoPath = userData[0].photo.replace(/\\/g, '/');
-
+  
   $('.logout-btn').on('click', function () {
     app.preloader.show();
     app.panel.close('.panel-left', true);
@@ -85,7 +86,7 @@ $(document).on('page:init', async function (e, page) {
     setTimeout(function () {
       app.views.main.router.navigate('/login/');
       app.preloader.hide();
-    }, 2000);
+    }, 3000);
   });
 
   $('.user-photo')[0].src = (userData[0].photo.length == 0) ? '/venufy/assets/me.jpg' : `/venufy/Backend-API/${userPhotoPath}`;
@@ -132,7 +133,7 @@ $(document).on('page:init', '.page[data-name="onboarding"]', function (e, page) 
 // Handling user registration
 $(document).on('page:init', '.page[data-name="signup"]', function () {
   $('.signup-btn').on('click', async function (e) {
-    app.dialog.preloader();
+    app.preloader.show();
     e.preventDefault();
 
     let Fname = $('#fname').val();
@@ -162,13 +163,13 @@ $(document).on('page:init', '.page[data-name="signup"]', function () {
 
       await initDB();
       await addUser(newuser);
-      app.dialog.close();
+      app.preloader.hide();
       app.dialog.alert('User data saved successfully!', 'Success', () => {
         app.views.main.router.navigate('/login/');
       });
 
     } catch (error) {
-      app.dialog.close();
+      app.preloader.hide();
       app.dialog.alert('Error saving data: ' + error, 'Error');
     }
   });
@@ -180,7 +181,7 @@ $(document).on('page:init', '.page[data-name="signup"]', function () {
 $(document).on('page:init', '.page[data-name="login"]', function () {
 
   $('.login-btn').on('click', async function (e) {
-    app.dialog.preloader();
+    app.preloader.show();
     e.preventDefault(); // Prevent form submission refresh
 
     let Username = $('#username').val();
@@ -191,16 +192,16 @@ $(document).on('page:init', '.page[data-name="login"]', function () {
       const user = await getUserByUsername(Username);
 
       if (user && user.password === Password) {
-        sessionStorage.setItem('currentUser', JSON.stringify(user));
 
+        localStorage.setItem('currentUser', JSON.stringify(user));
         localStorage.setItem('logged-in', true);
 
-        app.dialog.close();
+        app.preloader.hide();
         app.views.main.router.navigate('/home/', {
           clearPreviousHistory: true
         });
       } else {
-        app.dialog.close();
+        app.preloader.hide();
         app.dialog.alert('Invalid username or password! <br> Kindly try again', 'Error');
       }
 
@@ -352,7 +353,7 @@ $(document).on('page:init', '.page[data-name="create-venue"]', function (e, page
 
   $('.venue-form').on('submit', async function (e) {
     e.preventDefault();
-    app.dialog.preloader();
+    app.preloader.show();
 
     // Retrieve form field values
     const venueName = $('.venue-name').val();
@@ -379,7 +380,7 @@ $(document).on('page:init', '.page[data-name="create-venue"]', function (e, page
       const result = await createVenue(formDataForVenue);
       const imageData = { venueId: result.venueId };
       await venueImage(imageData);
-      app.dialog.close();
+      app.preloader.hide();
       app.dialog.alert('Venue data saved successfully!', 'Success', () => {
 
         app.notification.create({
@@ -391,6 +392,7 @@ $(document).on('page:init', '.page[data-name="create-venue"]', function (e, page
         app.views.main.router.navigate('/home/');
       });
     } catch (error) {
+      app.preloader.hide();
       app.dialog.alert('Error saving data: ' + error, 'Error', () => {
         imageFile = null;
         $('.venue-image-preview')[0].style.display = 'none';
@@ -403,11 +405,10 @@ $(document).on('page:init', '.page[data-name="create-venue"]', function (e, page
 
 // Venue details page
 $(document).on('page:init', '.page[data-name="venue-details"]', async function (e, page) {
+  app.dialog.preloader();
 
   let { id, owner } = page.route.params;  // id is venue's id
   let imageFile = null;
-
-  app.dialog.preloader();
 
   if (!currentUser) { app.views.main.router.navigate('/login/'); }
 
@@ -446,7 +447,9 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
 
       swipperEl[0].appendChild(listItem);
     });
-    app.dialog.close();
+    setTimeout(() => {
+      app.dialog.close();
+    }, 2000);
   } catch (error) {
     app.dialog.close();
     app.dialog.alert('Error retrieving venue details: ' + error, 'Error');
@@ -470,7 +473,7 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
   // Handle the image upload form submission
   $('#imageUploadForm').on('submit', async function (e) {
     e.preventDefault();
-    app.dialog.preloader();
+    app.preloader.show();
 
     const formData = new FormData();
     formData.append('venueId', id);
@@ -482,7 +485,7 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
       const images = await fetchAllImages(id);
       if (images.length < 3) {
         await addImage(formData);
-        app.dialog.close();
+        app.preloader.hide();
         // app.views.main.router.refreshPage();
         app.views.main.router.navigate(
           app.views.main.router.currentRoute.url,
@@ -490,12 +493,12 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
         );
 
       } else {
-        app.dialog.close();
+        app.preloader.hide();
         app.dialog.alert('You have reached the maximum of three images! Consider subscribing to premium in order to upload more images and videos', 'Alert !!');
       }
 
     } catch (error) {
-      app.dialog.close();
+      app.preloader.hide();
       app.dialog.alert('Error uploading image: ' + error, 'Error');
     }
   });
@@ -506,21 +509,22 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
         'Deleting a venue also deletes all its events and related assets!',
         '<p style="color:red">Warning !!</p>',
         async () => {
-          app.dialog.preloader();
+          app.preloader.show();
 
           try {
             await deleteVenueById(id);
-            app.dialog.close();
+            app.preloader.hide();
             app.dialog.alert('Venue deleted successfully', 'Success !!', () => {
               app.views.main.router.navigate('/home/');
             });
           } catch (error) {
-            app.dialog.close();
+            app.preloader.hide();
             app.dialog.alert('Error deleting venue: ' + error, 'Error');
           }
         }
       );
     } catch (error) {
+      app.preloader.hide();
       app.dialog.alert('Error deleting venue: ' + error, 'Error');
     }
   });
@@ -582,10 +586,16 @@ $(document).on('page:init', '.page[data-name="edit-venue"]', async function (e, 
 // Creating event under a chosen venue
 $(document).on('page:init', '.page[data-name="create-event"]', async function (e, page) {
 
-  let { id } = page.route.params;
+  let { id } = page.route.params;  // Venue's id
 
   // Get current venue
   let venue = await fetchVenueById(id);
+  let organizerData = await fetchUserById(userID);
+  let ownerData = await fetchUserById(venue[0].owner);
+
+  const organizerName = organizerData[0].fname + ' ' + organizerData[0].lname;
+  const venueName = venue[0].name;
+
   $(page.el)
     .find('.form-title')
     .html(`Adding a new event under <strong>${venue[0].name}, ${venue[0].address}</strong>`);
@@ -607,7 +617,7 @@ $(document).on('page:init', '.page[data-name="create-event"]', async function (e
   // Use the form's submit event to handle the upload
   $('.create-event-form').on('submit', async function (e) {
     e.preventDefault();
-    app.dialog.preloader();
+    app.preloader.show();
 
     // Retrieve form field values
     const eventTitle = $('.event-title').val();
@@ -619,12 +629,15 @@ $(document).on('page:init', '.page[data-name="create-event"]', async function (e
       organizer: userID,
       title: eventTitle,
       description: eventDescription,
-      date: eventDate
+      date: eventDate,
+      venueName: venueName,
+      ownerEmail: ownerData[0].email,
+      organizerName: organizerName,
     };
 
     try {
       await createEvent(event);
-      app.dialog.close();
+      app.preloader.hide();
       app.dialog.alert('Event data saved successfully!', 'Success', () => {
 
         app.notification.create({
@@ -632,15 +645,85 @@ $(document).on('page:init', '.page[data-name="create-event"]', async function (e
           title: 'Success!',
           text: `Event added. Complete payment on the 'Pending Events' page to finalize registration.`,
           closeButton: true,
+          closeTimeout: 10000,
         }).open();
         app.views.main.router.navigate('/home/');
       });
     } catch (error) {
-      app.dialog.close();
+      app.preloader.hide();
       app.dialog.alert('Error saving data: ' + error, 'Error');
     }
   });
 });
+
+
+async function displayEvents(events){
+  
+  const allEvents = $('#all-events');
+  const pendingEvents = $('#pending-events');
+  const pastEvents = $('#past-events');
+  const noItemBlock1 = $('.no-item-all');
+  const noItemBlock2 = $('.no-item-pending');
+  const noItemBlock3 = $('.no-item-past');
+
+  let eventList;
+
+  for (const event of events) {
+    if (event.status == 0) { eventList = pendingEvents; }
+    else if (event.status == 1) { eventList = allEvents }
+    else { eventList = pastEvents }
+
+    if (eventList == pendingEvents) { noItemBlock2[0].style.display = 'none'; }
+    if (eventList == pastEvents) { noItemBlock3[0].style.display = 'none'; }
+    if (eventList == allEvents) { noItemBlock1[0].style.display = 'none'; }
+
+    // Retrieve the event organizer's information
+    const organizer = await fetchUserById(event.organizer);
+    const venue = await fetchVenueById(event.venueId);
+
+    // Create a unique popover element for each event
+    const popover = document.createElement('div');
+    popover.className = 'popover event-details';
+    popover.id = `popover-${event.id}`; // Assign a unique ID
+
+    // Set the inner HTML for the popover
+    popover.innerHTML = `
+        <div class="popover-inner">
+            <div class="block">
+                <h3 style="margin:0px;">Event description: </h3>
+                <p style="margin:0px;">${event.description}</p>
+                <a href="#" class="link popover-close" style="float:right; margin:10px 30px 10px 0px; font-weight:bold;">Got it!</a>
+            </div>
+        </div>
+    `;
+
+    // Append the popover to the event list or another appropriate parent element
+    eventList[0].appendChild(popover);
+
+    // Create the event list item
+    const listItem = document.createElement('div');
+    listItem.innerHTML = `<a href="#" data-popover="#${popover.id}" class="link popover-open flex" style="width:100%; margin-bottom: 10px; background-color:rgb(243, 243, 243); color:#333;">
+                                <div class="flex" style="flex-direction:column; align-items:start; width:100%; height:auto;">
+                                  <h4 style="margin:1px;">${event.title}</h4>
+                                  <p style="margin:1px;">Event Date:  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
+                                  <p style="margin:1px;">Event Organizer:  ${organizer[0].fname} ${organizer[0].lname}</p>
+                                  <p style="margin:1px;">Event Location:  ${venue[0].name}, at ${venue[0].address}</p>
+                                </div>                     
+                              </a>`;
+
+    listItem.setAttribute('class', 'block');
+    listItem.setAttribute('style', 'margin:0px 0px 7px 0px;');
+    eventList[0].appendChild(listItem);
+
+    // Initialize the popover using Framework7's API
+    app.popover.create({
+      el: `#${popover.id}`,
+      targetEl: listItem.querySelector('.popover-open'),
+    });
+  }
+  app.dialog.close();
+
+}
 
 
 // All events page
@@ -649,71 +732,7 @@ $(document).on('page:init', '.page[data-name="all-events"]', async function (e, 
   try {
 
     const events = await fetchAllEvents();
-
-    const allEvents = $('#all-events');
-    const pendingEvents = $('#pending-events');
-    const pastEvents = $('#past-events');
-    const noItemBlock1 = $('.no-item-all');
-    const noItemBlock2 = $('.no-item-pending');
-    const noItemBlock3 = $('.no-item-past');
-
-    let eventList;
-
-    for (const event of events) {
-      if (event.status == 0) { eventList = pendingEvents; }
-      else if (event.status == 1) { eventList = allEvents }
-      else { eventList = pastEvents }
-
-      if (eventList == pendingEvents) { noItemBlock2[0].style.display = 'none'; }
-      if (eventList == pastEvents) { noItemBlock3[0].style.display = 'none'; }
-      if (eventList == allEvents) { noItemBlock1[0].style.display = 'none'; }
-
-      // Retrieve the event organizer's information
-      const organizer = await fetchUserById(event.organizer);
-      const venue = await fetchVenueById(event.venueId);
-
-      // Create a unique popover element for each event
-      const popover = document.createElement('div');
-      popover.className = 'popover event-details';
-      popover.id = `popover-${event.id}`; // Assign a unique ID
-
-      // Set the inner HTML for the popover
-      popover.innerHTML = `
-          <div class="popover-inner">
-              <div class="block">
-                  <h3 style="margin:0px;">Event description: </h3>
-                  <p style="margin:0px;">${event.description}</p>
-                  <a href="#" class="link popover-close" style="float:right; margin:10px 30px 10px 0px; font-weight:bold;">Got it!</a>
-              </div>
-          </div>
-      `;
-
-      // Append the popover to the event list or another appropriate parent element
-      eventList[0].appendChild(popover);
-
-      // Create the event list item
-      const listItem = document.createElement('div');
-      listItem.innerHTML = `<a href="#" data-popover="#${popover.id}" class="link popover-open flex" style="width:100%; margin-bottom: 10px; background-color:rgb(243, 243, 243); color:#333;">
-                                  <div class="flex" style="flex-direction:column; align-items:start; width:100%; height:auto;">
-                                    <h4 style="margin:1px;">${event.title}</h4>
-                                    <p style="margin:1px;">Event Date:  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
-                                    <p style="margin:1px;">Event Organizer:  ${organizer[0].fname} ${organizer[0].lname}</p>
-                                    <p style="margin:1px;">Event Location:  ${venue[0].name}, at ${venue[0].address}</p>
-                                  </div>                     
-                                </a>`;
-
-      listItem.setAttribute('class', 'block');
-      listItem.setAttribute('style', 'margin:0px 0px 7px 0px;');
-      eventList[0].appendChild(listItem);
-
-      // Initialize the popover using Framework7's API
-      app.popover.create({
-        el: `#${popover.id}`,
-        targetEl: listItem.querySelector('.popover-open'),
-      });
-    }
-    app.dialog.close();
-
+    displayEvents(events);
   } catch (error) {
     app.dialog.close();
     app.dialog.alert('Error retrieving events: ' + error, 'Error');
@@ -729,71 +748,7 @@ $(document).on('page:init', '.page[data-name="all-venue-events"]', async functio
 
   try {
     const events = await fetchEventsByVenueId(id);
-
-    const allEvents = $('#all-events');
-    const pendingEvents = $('#pending-events');
-    const pastEvents = $('#past-events');
-    const noItemBlock1 = $('.no-item-all');
-    const noItemBlock2 = $('.no-item-pending');
-    const noItemBlock3 = $('.no-item-past');
-
-    let eventList;
-
-    for (const event of events) {
-      if (event.status == 0) { eventList = pendingEvents; }
-      else if (event.status == 1) { eventList = allEvents }
-      else { eventList = pastEvents }
-
-      if (eventList == pendingEvents) { noItemBlock2[0].style.display = 'none'; }
-      if (eventList == pastEvents) { noItemBlock3[0].style.display = 'none'; }
-      if (eventList == allEvents) { noItemBlock1[0].style.display = 'none'; }
-
-      // Retrieve the event organizer's information
-      const organizer = await fetchUserById(event.organizer);
-      const venue = await fetchVenueById(event.venueId);
-
-      // Create a unique popover element for each event
-      const popover = document.createElement('div');
-      popover.className = 'popover event-details';
-      popover.id = `popover-${event.id}`; // Assign a unique ID
-
-      // Set the inner HTML for the popover
-      popover.innerHTML = `
-          <div class="popover-inner">
-              <div class="block">
-                  <h3 style="margin:0px;">Event description: </h3>
-                  <p style="margin:0px;">${event.description}</p>
-                  <a href="#" class="link popover-close" style="float:right; margin:10px 30px 10px 0px; font-weight:bold;">Got it!</a>
-              </div>
-          </div>
-      `;
-
-      // Append the popover to the event list or another appropriate parent element
-      eventList[0].appendChild(popover);
-
-      // Create the event list item
-      const listItem = document.createElement('div');
-      listItem.innerHTML = `<a href="#" data-popover="#${popover.id}" class="link popover-open flex" style="width:100%; margin-bottom: 10px; background-color:rgb(243, 243, 243); color:#333;">
-                                  <div class="flex" style="flex-direction:column; align-items:start; width:100%; height:auto;">
-                                    <h4 style="margin:1px;">${event.title}</h4>
-                                    <p style="margin:1px;">Event Date:  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
-                                    <p style="margin:1px;">Event Organizer:  ${organizer[0].fname} ${organizer[0].lname}</p>
-                                    <p style="margin:1px;">Event Location:  ${venue[0].name}, at ${venue[0].address}</p>
-                                  </div>                     
-                                </a>`;
-
-      listItem.setAttribute('class', 'block');
-      listItem.setAttribute('style', 'margin:0px 0px 7px 0px;');
-      eventList[0].appendChild(listItem);
-
-      // Initialize the popover using Framework7's API
-      app.popover.create({
-        el: `#${popover.id}`,
-        targetEl: listItem.querySelector('.popover-open'),
-      });
-    }
-    app.dialog.close();
-
+    displayEvents(events);
   } catch (error) {
     app.dialog.close();
     app.dialog.alert('Error retrieving events: ' + error, 'Error');
@@ -850,7 +805,11 @@ $(document).on('page:init', '.page[data-name="edit-profile"]', function (e, page
       await updateUser(userID, userFormData);
       setTimeout(function () {
         app.preloader.hide();
-        app.dialog.alert('Your data was saved successfully!', 'Success');
+        app.dialog.alert('Your data was saved successfully!', 'Success', () => {
+          app.views.main.router.navigate('/home/');
+        }
+        );
+        // Update the user data in local storage
       }, 2500);
     } catch (error) {
       app.preloader.hide();

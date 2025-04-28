@@ -65,13 +65,13 @@
                 <ul class="no-hairlines-md">
                     <li class="item-content item-input" style="height: 60px;">
                         <div class="item-inner">
-                          <div class="item-title item-label">Filter Venues</div>
+                          <div class="item-title item-label">Filter Options</div>
                           <div class="item-input-wrap">
                             <select id="filter-category">
-                              <option value="" style="font-size: 12px;">Select</option>
-                              <option value="by-location" style="font-size: 12px;">By Location</option>
-                              <option value="by-capacity" style="font-size: 12px;">By Capacity</option>
-                              <option value="by-pricing" style="font-size: 12px;">By Pricing</option>
+                              <option value="" style="font-size: 12px;">Select Preference</option>
+                              <option value="by-location" style="font-size: 12px; border: 1px solid #333;" class="text-align-center">By Location</option>
+                              <option value="by-capacity" style="font-size: 12px; border: 1px solid #333;" class="text-align-center">By Capacity</option>
+                              <option value="by-pricing" style="font-size: 12px; border: 1px solid #333;" class="text-align-center">By Pricing</option>
                             </select>
                           </div>
                         </div>
@@ -80,7 +80,7 @@
                         <div class="item-inner">
                             <div class="item-title item-label">Location</div>
                             <div class="item-input-wrap">
-                                <input type="text" id="filter-location" placeholder="e.g. New York">
+                                <input type="text" id="filter-location" style="padding-bottom: 5px;" placeholder="e.g. Molyko">
                             </div>
                         </div>
                     </li>
@@ -88,7 +88,7 @@
                         <div class="item-inner">
                             <div class="item-title item-label">Min. Capacity</div>
                             <div class="item-input-wrap">
-                                <input type="number" id="filter-capacity" placeholder="e.g. 100">
+                                <input type="number" id="filter-capacity" style="padding-bottom: 5px;" placeholder="e.g. 500">
                             </div>
                         </div>
                     </li>
@@ -96,7 +96,7 @@
                         <div class="item-inner">
                             <div class="item-title item-label">Max. Price</div>
                             <div class="item-input-wrap">
-                                <input type="number" id="filter-price" placeholder="e.g. 1500">
+                                <input type="number" id="filter-price" style="padding-bottom: 5px;" placeholder="e.g. 100000">
                             </div>
                         </div>
                     </li>

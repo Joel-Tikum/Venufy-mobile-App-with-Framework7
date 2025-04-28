@@ -3,12 +3,15 @@ const express = require('express');
 const webPush = require('web-push');
 const cors = require('cors');
 const mysql = require('mysql2');
-const mysql1   = require('mysql2/promise');
+const mysql1 = require('mysql2/promise');
 const multer = require('multer');
 const path = require('path');
-const fs = require("fs");
+// const fs = require("fs");
 const fs1 = require('fs/promises');
-require('dotenv').config();
+const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 const port = 3000; // You can choose any available port
@@ -81,6 +84,37 @@ webPush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY
 );
 
+
+// Nodemailer setup
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,     // e.g., smtp.mailtrap.io
+  port: Number(process.env.SMTP_PORT),
+  secure: false,                    // true for port 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+// Emailing function
+async function sendVenueOwnerEmail(ownerEmail, eventData) {
+  const mailOptions = {
+    from: '"Venufy Notification" <no-reply@venufy.com>',
+    to: ownerEmail,
+    replyTo: 'no-reply@venufy.com',
+    subject: `New Event Created for : ${eventData.venueName}`,
+    html: `
+      <h2 style="text-align:center;">Your venue <u>${eventData.venueName}</u> has a new booking!</h2>
+      <center>
+        <p><strong>Event Title:</strong> ${eventData.title}</p>
+        <p><strong>Scheduled Date:</strong> ${eventData.date}</p>
+        <p><strong>Created by:</strong> ${eventData.createdBy}</p>
+      </center>
+    `,
+  };
+
+  return transporter.sendMail(mailOptions);  // returns a promise :contentReference[oaicite:7]{index=7}
+}
+
 // Example API Endpoints
 
 // Example endpoint for sending a push notification
@@ -138,8 +172,8 @@ app.get("/users/:id", (req, res) => {
 
 
 // POST: Update user data
-app.put('/users/update/:id', upload_user_photo.single('photo'), (req, res) => { 
-  const { fname, lname, email, contact} = req.body;
+app.put('/users/update/:id', upload_user_photo.single('photo'), (req, res) => {
+  const { fname, lname, email, contact } = req.body;
   const { id } = req.params;
   imagePath = req.file ? req.file.path : '';
   const sql = 'UPDATE v_users SET fname = ?, lname = ?, email = ?, contact = ?, photo = ? WHERE id = ?';
@@ -158,7 +192,7 @@ app.put('/users/update/:id', upload_user_photo.single('photo'), (req, res) => {
 // Using upload.single('image') to process file upload for venue image
 app.post('/venues/create', upload_venue_image.single('image'), (req, res) => {
   const { name, address, capacity, pricing, description, owner } = req.body;
-  
+
   // If a file was uploaded, use its path. Otherwise, use an empty string or a default image path.
   imagePath = req.file ? req.file.path : '';
 
@@ -174,7 +208,7 @@ app.post('/venues/create', upload_venue_image.single('image'), (req, res) => {
 });
 
 // POST: Update an existing venue
-app.put('/venues/update/:id', (req, res) => { 
+app.put('/venues/update/:id', (req, res) => {
   const { name, address, capacity, pricing, description } = req.body;
   const { id } = req.params;
   const sql = 'UPDATE v_venues SET name = ?, address = ?, capacity = ?, pricing = ?, description = ? WHERE id = ?';
@@ -257,7 +291,7 @@ app.delete('/venues/delete/:id', async (req, res) => {
 // POST: Add image for a venue
 app.post('/images/venue-image', (req, res) => {
   const { venueId } = req.body;
-  
+
   const sql = 'INSERT INTO v_images (venueId, image) VALUES (?, ?)';
   pool.query(sql, [venueId, imagePath], (err, result) => {
     if (err) {
@@ -274,7 +308,7 @@ app.post('/images/venue-image', (req, res) => {
 // Using upload.single('image') to handle the image upload
 app.post('/images/add-image', upload_venue_image.single('image'), (req, res) => {
   const { venueId } = req.body;
-  
+
   // If a file is uploaded, use its path as the reference
   const image_Path = req.file ? req.file.path : '';
 
@@ -304,18 +338,32 @@ app.get("/venue-images/:id", (req, res) => {
 });
 
 
-// POST: Create a new event
-app.post('/events/create', (req, res) => {
-  const { venueId, organizer, title, description, date } = req.body;
-  const sql = 'INSERT INTO v_events (venueId, organizer, title, description, date) VALUES (?, ?, ?, ?, ?)';
-  pool.query(sql, [venueId, organizer, title, description, date], (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Database error' });
-    } else {
-      res.json({ message: 'Event created successfully', eventId: result.insertId });
-    }
-  });
+// POST: Create a new event and notify venue owner
+app.post('/events/create', async (req, res) => {
+  
+  const { venueId, organizer, title, description, date, venueName, ownerEmail, organizerName} = req.body;
+  try {
+    // 1. Insert the new event into v_events
+    const sql = 'INSERT INTO v_events (venueId, organizer, title, description, date) VALUES (?, ?, ?, ?, ?)';
+    pool.query(sql, [venueId, organizer, title, description, date], async (err, insertResult) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+   
+    // 2. Send notification email to the venue owner
+    await sendVenueOwnerEmail(ownerEmail, {title, date, venueName, createdBy: organizerName,}); // sendMail returns a promise :contentReference[oaicite:5]{index=5}
+
+    // 3. Respond to the client
+    res
+      .status(201)
+      .json({ message: 'Event created and owner notified', eventId: insertResult.insertId });
+    });
+      console.log('Event created and email sent to venue owner:', ownerEmail);
+  } catch (error) {
+    console.error('Error creating event or sending email:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 
