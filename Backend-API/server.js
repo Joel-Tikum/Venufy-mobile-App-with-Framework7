@@ -101,9 +101,9 @@ async function sendVenueOwnerEmail(ownerEmail, eventData) {
     from: '"Venufy Notification" <no-reply@venufy.com>',
     to: ownerEmail,
     replyTo: 'no-reply@venufy.com',
-    subject: `New Event Created for : ${eventData.venueName}`,
+    subject: `New booking for ${eventData.venueName}`,
     html: `
-      <h2 style="text-align:center;">Your venue <u>${eventData.venueName}</u> has a new booking!</h2>
+      <h2>Your venue <u>${eventData.venueName}</u> has a new booking!</h2>
       <center>
         <p><strong>Event Title:</strong> ${eventData.title}</p>
         <p><strong>Scheduled Date:</strong> ${eventData.date}</p>
@@ -359,7 +359,6 @@ app.post('/events/create', async (req, res) => {
       .status(201)
       .json({ message: 'Event created and owner notified', eventId: insertResult.insertId });
     });
-      console.log('Event created and email sent to venue owner:', ownerEmail);
   } catch (error) {
     console.error('Error creating event or sending email:', error);
     res.status(500).json({ error: 'Server error' });
