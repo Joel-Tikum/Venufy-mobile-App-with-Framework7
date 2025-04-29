@@ -31,15 +31,7 @@ var app = new Framework7({
   actions: {
     closeOnEscape: true,
   },
-  vi: {
-    placementId: "pltd4o7ibb9rc653x14",
-  },
-  onAjaxStart: function (xhr) { app.preloader.show(); },
-  onAjaxComplete: function (xhr) {
-    setTimeout(function () {
-      app.preloader.hide();
-    }, 3000);
-  }
+  // Add default language
 });
 
 
@@ -70,7 +62,7 @@ let userID;
 let currentUser;
 let userData;
 let userPhotoPath;
-$(document).on('page:init', async function (e, page) {
+$(document).on('page:init', async function () {
 
   currentUser = JSON.parse(localStorage.getItem('currentUser'));
   userID = currentUser ? currentUser.userId : null;
@@ -131,7 +123,7 @@ $(document).on('page:init', '.page[data-name="onboarding"]', function (e, page) 
 
 
 // Handling user registration
-$(document).on('page:init', '.page[data-name="signup"]', function () {
+$(document).on('page:init', '.page[data-name="signup"]', function (e, page) {
   $('.signup-btn').on('click', async function (e) {
     app.preloader.show();
     e.preventDefault();
@@ -178,7 +170,7 @@ $(document).on('page:init', '.page[data-name="signup"]', function () {
 
 
 // Handling user login
-$(document).on('page:init', '.page[data-name="login"]', function () {
+$(document).on('page:init', '.page[data-name="login"]', function (e, page) {
 
   $('.login-btn').on('click', async function (e) {
     app.preloader.show();
@@ -290,7 +282,7 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
       };
 
       // Perform venue filtering
-      const filtered = venues.filter(venue => {
+      const filteredVenues = venues.filter(venue => {
         return Object.keys(filters).every(key => {
           const value = filters[key];
           if (value === null || value === '') return true;
@@ -312,7 +304,7 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
 
       // Display filtered venues
       allVenues.empty();
-      displayVenues(filtered);
+      displayVenues(filteredVenues);
       app.popover.close('.popover-venue-filter', true);
       setTimeout(() => {
         app.dialog.close();
@@ -417,6 +409,7 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
   let editVenueBtn = $('.edit-venue');
   let deleteVenueBtn = $('.delete-venue');
   let addImageBtn = $('.add-image');
+  let bellIcon = $('.bell-icon');
 
   try {
     const venue = await fetchVenueById(id);
@@ -424,6 +417,7 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
 
     if (owner == userID) {
       addEventBtn[0].style.display = "none";
+      bellIcon[0].style.display = "none";
       addImageBtn[0].style.display = "block";
       editVenueBtn[0].style.display = "block";
       deleteVenueBtn[0].style.display = "block";
@@ -585,6 +579,10 @@ $(document).on('page:init', '.page[data-name="edit-venue"]', async function (e, 
 
 // Creating event under a chosen venue
 $(document).on('page:init', '.page[data-name="create-event"]', async function (e, page) {
+  app.preloader.show();
+  setTimeout(() => {
+    app.preloader.hide();
+  },2000);
 
   let { id } = page.route.params;  // Venue's id
 
@@ -645,7 +643,7 @@ $(document).on('page:init', '.page[data-name="create-event"]', async function (e
           title: 'Success!',
           text: `Event added. Complete payment on the 'Pending Events' page to finalize registration.`,
           closeButton: true,
-          closeTimeout: 10000,
+          closeTimeout: 5000,
         }).open();
         app.views.main.router.navigate('/home/');
       });
@@ -759,6 +757,7 @@ $(document).on('page:init', '.page[data-name="all-venue-events"]', async functio
 // Edit profile page
 $(document).on('page:init', '.page[data-name="edit-profile"]', function (e, page) {
   app.panel.close('.panel-left', true);
+  app.preloader.show();
 
   let userPhoto = null;
 
@@ -780,6 +779,10 @@ $(document).on('page:init', '.page[data-name="edit-profile"]', function (e, page
   $('#lname').val(userData[0].lname);
   $('#email').val(userData[0].email);
   $('#contact').val(userData[0].contact);
+
+  setTimeout(() =>{
+    app.preloader.hide();
+  },2000);
 
   $('.edit-profile-form').on('submit', async (e) => {
     e.preventDefault();
