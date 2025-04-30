@@ -48,13 +48,8 @@ import {
   initDB, addUser, createUser, getUserByUsername, fetchAllVenues, createVenue,
   venueImage, fetchVenueById, fetchAllImages, addImage, deleteVenueById,
   updateVenue, createEvent, fetchAllEvents, fetchUserById, fetchEventsByVenueId,
-  updateUser, deleteDB,
+  updateUser, fetchEventsByOrganizerId, deleteDB,
 } from './db.js';
-
-
-$(document).on('page:init', '.page[data-name="test-file"]', function (e, page) {
-  console.log('The test file');
-});
 
 
 // All pages affected
@@ -380,6 +375,7 @@ $(document).on('page:init', '.page[data-name="create-venue"]', function (e, page
           title: 'Success!',
           text: 'Your venue has been added.',
           closeButton: true,
+          closeTimeout: 5000,
         }).open();
         app.views.main.router.navigate('/home/');
       });
@@ -414,6 +410,7 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
   try {
     const venue = await fetchVenueById(id);
     const images = await fetchAllImages(id);
+    const userEvents = await fetchEventsByOrganizerId(userID);
 
     if (owner == userID) {
       addEventBtn[0].style.display = "none";
@@ -423,8 +420,17 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
       deleteVenueBtn[0].style.display = "block";
       editVenueBtn[0].setAttribute("href", `/edit-venue/${id}/`);
     }
-    addEventBtn[0].setAttribute("href", `/create-event/${id}`);
+        
+    if (userEvents.length == 2) {
+      addEventBtn[0].onclick = function () {
+        app.dialog.alert('You have reached the maximum of two events! Consider subscribing to premium in order to create more events', 'Alert !!');
+      }
+    }else{
+      addEventBtn[0].setAttribute("href", `/create-event/${id}`);
+    }
+
     allEventBtn[0].setAttribute("href", `/all-venue-events/${id}/`);
+    
 
     const swipperEl = document.getElementsByClassName('demo-swiper-multiple');
 
@@ -685,7 +691,18 @@ async function displayEvents(events){
     popover.id = `popover-${event.id}`; // Assign a unique ID
 
     // Set the inner HTML for the popover
-    popover.innerHTML = `
+    if (userID == organizer[0].id){
+      popover.innerHTML = `
+        <div class="popover-inner">
+            <div class="block">
+                <p class="text-align-center">${event.title}</p>
+                <button href="/events-update/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px;"><i class="icon f7-icons size-30">pencil</i>Reschedule</button>
+                <button class="button button-raised delete-event" style="margin-top: 15px;"><i class="icon f7-icons">trash</i> Delete Event</button>
+            </div>
+        </div>
+    `;
+    }else{
+      popover.innerHTML = `
         <div class="popover-inner">
             <div class="block">
                 <h3 style="margin:0px;">Event description: </h3>
@@ -694,6 +711,7 @@ async function displayEvents(events){
             </div>
         </div>
     `;
+    }
 
     // Append the popover to the event list or another appropriate parent element
     eventList[0].appendChild(popover);

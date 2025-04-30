@@ -306,10 +306,29 @@ export async function fetchAllEvents() {
 }
 
 
-// Fetching all images for a specific venue
+// Fetching all events for a specific venue
 export async function fetchEventsByVenueId(venueId) {
   try {
     const response = await fetch(`${base_URL}/events/${venueId}`);
+    if (!response.ok) {
+      // Extract error message from the response body
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Network response was not ok');
+    }
+    const events = await response.json();
+    return events;
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+    // Optionally, rethrow the error or return a default value
+    throw error;
+  }
+}
+
+
+// Fetching all events for a specific organizer
+export async function fetchEventsByOrganizerId(userId) {
+  try {
+    const response = await fetch(`${base_URL}/user/events/${userId}`);
     if (!response.ok) {
       // Extract error message from the response body
       const errorData = await response.json();

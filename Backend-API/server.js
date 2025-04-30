@@ -89,7 +89,7 @@ webPush.setVapidDetails(
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,     // e.g., smtp.mailtrap.io
   port: Number(process.env.SMTP_PORT),
-  secure: false,                    // true for port 465, false for other ports
+  secure: false, 
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -383,6 +383,20 @@ app.get("/events", (req, res) => {
 app.get("/events/:id", (req, res) => {
   const venueId = req.params.id;
   pool.query("SELECT * FROM v_events WHERE venueId = ?", [venueId], (err, rows) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+
+// Retrieve all events created by a given user
+app.get("/user/events/:userId", (req, res) => {
+  const userId = req.params.userId;
+  pool.query("SELECT * FROM v_events WHERE organizer = ?", [userId], (err, rows) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Database error' });
