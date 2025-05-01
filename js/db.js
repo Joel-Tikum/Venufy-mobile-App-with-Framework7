@@ -344,6 +344,26 @@ export async function fetchEventsByOrganizerId(userId) {
 }
 
 
+// Deleting event by eventId
+export async function deleteEventById(eventId) { 
+  try {
+    const response = await fetch(`${base_URL}/events/delete/${eventId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to delete event");
+    }
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("There was a problem with the delete operation:", error);
+    throw error;
+  }
+}
+
+
 
 
 

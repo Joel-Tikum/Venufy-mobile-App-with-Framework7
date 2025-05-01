@@ -49,6 +49,7 @@ import {
   venueImage, fetchVenueById, fetchAllImages, addImage, deleteVenueById,
   updateVenue, createEvent, fetchAllEvents, fetchUserById, fetchEventsByVenueId,
   updateUser, fetchEventsByOrganizerId, deleteDB,
+  deleteEventById,
 } from './db.js';
 
 
@@ -62,10 +63,10 @@ $(document).on('page:init', async function () {
   currentUser = JSON.parse(localStorage.getItem('currentUser'));
   userID = currentUser ? currentUser.userId : null;
   // Check if the user is logged in
-  
+
   userData = await fetchUserById(userID);
   userPhotoPath = userData[0].photo.replace(/\\/g, '/');
-  
+
   $('.logout-btn').on('click', function () {
     app.preloader.show();
     app.panel.close('.panel-left', true);
@@ -210,6 +211,7 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
   const popularVenues = $('.popular-venues');
   const noItemBlock2 = $('.no-item-popular');
   let venueList;
+  let numberOfVenues = 0;
 
   function displayVenues(venues) {
     // Loop through venues and create list items
@@ -217,6 +219,10 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
       venueList = (venue.status == 1) ? popularVenues : allVenues;
       if (venueList === popularVenues) {
         noItemBlock2[0].style.display = "none";
+      }
+
+      if(userID == venue.owner) {
+        numberOfVenues++;
       }
 
       // Create a list item for each venue
@@ -247,6 +253,15 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
 
     // Display all venues normally
     displayVenues(venues);
+
+    // Check if the user has created any venues
+    $('.create-venue').on('click', function () {
+      if (numberOfVenues == 2) {
+        app.dialog.alert('You have reached the maximum of two venues! Consider subscribing to premium in order to create more venues', 'Alert !!');
+      } else {
+        app.views.main.router.navigate('/create-venue/');
+      }
+    });
 
     $('#filter-category').on('change', () => {
       const userPreference = $('#filter-category').val();
@@ -420,17 +435,29 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
       deleteVenueBtn[0].style.display = "block";
       editVenueBtn[0].setAttribute("href", `/edit-venue/${id}/`);
     }
-        
+
+    $('.add-image').on('click', async () => {
+      if (images.length == 3) {
+        app.dialog.alert('You have reached the maximum of three images! Consider subscribing to premium in order to upload more images and videos', 'Alert !!');
+      } else {
+        const popover = app.popover.create({
+          el: '.popover-add-image',
+          targetEl: '.open-popover', 
+        });
+        popover.open();
+      }
+    });
+
     if (userEvents.length == 2) {
       addEventBtn[0].onclick = function () {
         app.dialog.alert('You have reached the maximum of two events! Consider subscribing to premium in order to create more events', 'Alert !!');
       }
-    }else{
+    } else {
       addEventBtn[0].setAttribute("href", `/create-event/${id}`);
     }
 
     allEventBtn[0].setAttribute("href", `/all-venue-events/${id}/`);
-    
+
 
     const swipperEl = document.getElementsByClassName('demo-swiper-multiple');
 
@@ -482,21 +509,21 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
     }
 
     try {
-      const images = await fetchAllImages(id);
-      if (images.length < 3) {
-        await addImage(formData);
-        app.preloader.hide();
-        // app.views.main.router.refreshPage();
-        app.views.main.router.navigate(
-          app.views.main.router.currentRoute.url,
-          { reloadCurrent: true, ignoreCache: true }
-        );
+      await addImage(formData);
+      // app.views.main.router.refreshPage();
+      app.views.main.router.navigate(
+        app.views.main.router.currentRoute.url,
+        { reloadCurrent: true, ignoreCache: true }
+      );
 
-      } else {
-        app.preloader.hide();
-        app.dialog.alert('You have reached the maximum of three images! Consider subscribing to premium in order to upload more images and videos', 'Alert !!');
-      }
-
+      app.notification.create({
+        icon: '<i class="icon f7-icons">bell</i>',
+        title: 'Success!',
+        text: 'Image uploaded successfully.',
+        closeButton: true,
+        closeTimeout: 2000,
+      }).open();
+      app.preloader.hide();
     } catch (error) {
       app.preloader.hide();
       app.dialog.alert('Error uploading image: ' + error, 'Error');
@@ -588,7 +615,7 @@ $(document).on('page:init', '.page[data-name="create-event"]', async function (e
   app.preloader.show();
   setTimeout(() => {
     app.preloader.hide();
-  },2000);
+  }, 2000);
 
   let { id } = page.route.params;  // Venue's id
 
@@ -661,8 +688,30 @@ $(document).on('page:init', '.page[data-name="create-event"]', async function (e
 });
 
 
-async function displayEvents(events){
-  
+// Function to delete event
+function deleteEvent(eventId) {
+  app.dialog.confirm(
+    'Deleting an event is irreversible! Are you sure you want to proceed?',
+    '<p style="color:red">Warning !!</p>',
+    async () => {
+      app.preloader.show();
+      try {
+        await deleteEventById(eventId);
+        app.preloader.hide();
+        app.dialog.alert('Event deleted successfully', 'Success !!', () => {
+          app.views.main.router.refreshPage();
+        });
+      } catch (error) {
+        app.preloader.hide();
+        app.dialog.alert('Error deleting event: ' + error, 'Error');
+      }
+    });
+}
+
+
+// Function to display events
+async function displayEvents(events) {
+
   const allEvents = $('#all-events');
   const pendingEvents = $('#pending-events');
   const pastEvents = $('#past-events');
@@ -691,17 +740,17 @@ async function displayEvents(events){
     popover.id = `popover-${event.id}`; // Assign a unique ID
 
     // Set the inner HTML for the popover
-    if (userID == organizer[0].id){
+    if (userID == organizer[0].id) {
       popover.innerHTML = `
         <div class="popover-inner">
             <div class="block">
                 <p class="text-align-center">${event.title}</p>
-                <button href="/events-update/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px;"><i class="icon f7-icons size-30">pencil</i>Reschedule</button>
-                <button class="button button-raised delete-event" style="margin-top: 15px;"><i class="icon f7-icons">trash</i> Delete Event</button>
+                <button href="/events-update/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px;">Reschedule</button>
+                <button class="button button-raised delete-event-btn" style="margin-top: 15px; color:red;"><i class="icon f7-icons">trash</i> Delete Event</button>
             </div>
         </div>
     `;
-    }else{
+    } else {
       popover.innerHTML = `
         <div class="popover-inner">
             <div class="block">
@@ -736,6 +785,16 @@ async function displayEvents(events){
       el: `#${popover.id}`,
       targetEl: listItem.querySelector('.popover-open'),
     });
+
+    // Add event listener for the delete button
+    const deleteBtn = popover.querySelector('.delete-event-btn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', function () {
+        app.popover.close(popover);
+        deleteEvent(event.id);
+      });
+    }
+
   }
   app.dialog.close();
 
@@ -798,9 +857,9 @@ $(document).on('page:init', '.page[data-name="edit-profile"]', function (e, page
   $('#email').val(userData[0].email);
   $('#contact').val(userData[0].contact);
 
-  setTimeout(() =>{
+  setTimeout(() => {
     app.preloader.hide();
-  },2000);
+  }, 2000);
 
   $('.edit-profile-form').on('submit', async (e) => {
     e.preventDefault();

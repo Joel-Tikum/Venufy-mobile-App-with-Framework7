@@ -407,6 +407,22 @@ app.get("/user/events/:userId", (req, res) => {
 });
 
 
+// deleting an event by eventId
+app.delete('/events/delete/:eventId', (req, res) => {
+  const eventId = req.params.eventId;
+  pool.query('DELETE FROM v_events WHERE id = ?', [eventId], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database error' });
+    } else if (result.affectedRows === 0) {
+      res.status(404).json({ message: 'Event not found' });
+    } else {
+      res.json({ message: 'Event deleted successfully' });
+    }
+  });
+});
+
+
 
 
 
