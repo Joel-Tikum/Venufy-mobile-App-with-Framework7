@@ -11,8 +11,8 @@
             <div class="title" style="margin-left: auto;">Venue Listing</div>
             <!-- Optional right icon, e.g. a search button -->
             <div class="right">
-                <a href="#" class="link icon-only popover-open" data-popover=".popover-venue-filter">
-                    <i class="f7-icons">search</i>
+                <a href="#" class="link icon-only open-venue-filter-dialog">
+                    <i class="f7-icons">funnel</i>
                 </a>
             </div>
         </div>
@@ -21,7 +21,7 @@
     <!-- Page Content -->
     <div class="page-content" style="padding-bottom: 60px;">
         <!-- Search Bar (if you want an inline search) -->
-        <form class="searchbar searchbar-init">
+        <form class="searchbar searchbar-init searchbar-outline">
             <div class="searchbar-inner">
                 <div class="searchbar-input-wrap">
                     <input type="search" placeholder="Find Venue..." />
@@ -55,55 +55,6 @@
             </div>
         </div>
 
-    </div>
-
-    <!-- Popover for Image Upload -->
-    <div class="popover popover-venue-filter">
-        <div class="popover-inner" style="padding-bottom: 10px;">
-            <h4 class="text-align-center">Filter venues according to your preference</h4>
-            <div class="block list">
-                <ul class="no-hairlines-md">
-                    <li class="item-content item-input" style="height: 60px;">
-                        <div class="item-inner">
-                          <div class="item-title item-label">Filter Options</div>
-                          <div class="item-input-wrap">
-                            <select id="filter-category">
-                              <option value="" style="font-size: 12px;">Select Preference</option>
-                              <option value="by-location" style="font-size: 12px; border: 1px solid #333;" class="text-align-center">By Location</option>
-                              <option value="by-capacity" style="font-size: 12px; border: 1px solid #333;" class="text-align-center">By Capacity</option>
-                              <option value="by-pricing" style="font-size: 12px; border: 1px solid #333;" class="text-align-center">By Pricing</option>
-                            </select>
-                          </div>
-                        </div>
-                      </li>
-                    <li class="item-content item-input by-location" style="height: 60px; display: none;">
-                        <div class="item-inner">
-                            <div class="item-title item-label">Location</div>
-                            <div class="item-input-wrap">
-                                <input type="text" id="filter-location" style="padding-bottom: 5px;" placeholder="e.g. Molyko">
-                            </div>
-                        </div>
-                    </li>
-                    <li class="item-content item-input by-capacity" style="height: 60px; display: none;">
-                        <div class="item-inner">
-                            <div class="item-title item-label">Min. Capacity</div>
-                            <div class="item-input-wrap">
-                                <input type="number" id="filter-capacity" style="padding-bottom: 5px;" placeholder="e.g. 500">
-                            </div>
-                        </div>
-                    </li>
-                    <li class="item-content item-input by-pricing" style="height: 60px; display: none;">
-                        <div class="item-inner">
-                            <div class="item-title item-label">Max. Price</div>
-                            <div class="item-input-wrap">
-                                <input type="number" id="filter-price" style="padding-bottom: 5px;" placeholder="e.g. 100000">
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-                <button class="button button-raised margin-top apply-filters-btn" style="display: none;"><i class="icon f7-icons">funnel</i> Apply Filter</button>
-            </div>
-        </div>
     </div>
 
     <!-- Toolbar (bottom) -->

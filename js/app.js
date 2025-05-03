@@ -221,7 +221,7 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
         noItemBlock2[0].style.display = "none";
       }
 
-      if(userID == venue.owner) {
+      if (userID == venue.owner) {
         numberOfVenues++;
       }
 
@@ -235,7 +235,7 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
                                     <div>
                                       <div class="item-title">${venue.name}</div>
                                       <div class="item-subtitle">${venue.address}</div>
-                                      <div class="item-after text-color-green">${venue.pricing} XAF</div>
+                                      <div class="item-after text-color-green" style="font-weight:bold;">${venue.pricing} XAF</div>
                                     </div>
                                   </div>
                                 </div>
@@ -263,62 +263,91 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
       }
     });
 
-    $('#filter-category').on('change', () => {
-      const userPreference = $('#filter-category').val();
-      if (userPreference === 'by-location') { $('.apply-filters-btn')[0].style.display = 'block'; $('.by-location')[0].style.display = 'block'; }
-      if (userPreference === 'by-capacity') { $('.apply-filters-btn')[0].style.display = 'block'; $('.by-capacity')[0].style.display = 'block'; }
-      if (userPreference === 'by-pricing') { $('.apply-filters-btn')[0].style.display = 'block'; $('.by-pricing')[0].style.display = 'block'; }
-    });
+    $('.open-venue-filter-dialog').on('click', function () {
+      app.dialog.create({
+        title: 'Filter venues by your preferences',
+        content: `
+                <div class="list no-hairlines-md">
+                <ul>
+                      <li class="item-content item-input item-input-outline" style="height:60px">
+                        <div class="item-inner">
+                            <div class="item-title item-floating-label" style="background:transparent;">Location</div>
+                            <div class="item-input-wrap">
+                                <input type="text" id="filter-location" style="padding-bottom: 5px;" placeholder="e.g. Molyko">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="item-content item-input item-input-outline" style="height:60px">
+                        <div class="item-inner">
+                            <div class="item-title item-floating-label" style="background:transparent;">Min. Capacity</div>
+                            <div class="item-input-wrap">
+                                <input type="number" id="filter-capacity" style="padding-bottom: 5px;" placeholder="e.g. 500">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="item-content item-input item-input-outline" style="height:60px">
+                        <div class="item-inner">
+                            <div class="item-title item-floating-label" style="background:transparent;">Max. Price</div>
+                            <div class="item-input-wrap">
+                                <input type="number" id="filter-price" style="padding-bottom: 5px;" placeholder="e.g. 100000">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                </div>
+                <button class="button button-raised margin-top apply-filters-btn"><i class="icon f7-icons">funnel</i> Apply Filter</button>
+            `,
+        cssClass: 'filter-dialog',
+        backdrop: true,
+        closeByBackdropClick: true,
+        closeOnEscape: true,
 
-    $('.apply-filters-btn').on('click', async () => {
-      app.dialog.preloader();
-
-      // Disable inputs and buttons
-      $('.apply-filters-btn')[0].style.display = 'none';
-      $('.by-location')[0].style.display = 'none';
-      $('.by-capacity')[0].style.display = 'none';
-      $('.by-pricing')[0].style.display = 'none';
-
-      // Get user's preferences
-      const locationFilter = $('#filter-location').val().trim();
-      const minCapacity = parseInt($('#filter-capacity').val(), 10);
-      const maxPrice = parseFloat($('#filter-price').val());
-
-      // Build filters object
-      const filters = {
-        location: locationFilter,
-        capacity: isNaN(minCapacity) ? null : minCapacity,
-        price: isNaN(maxPrice) ? null : maxPrice,
-      };
-
-      // Perform venue filtering
-      const filteredVenues = venues.filter(venue => {
-        return Object.keys(filters).every(key => {
-          const value = filters[key];
-          if (value === null || value === '') return true;
-
-          if (key === 'location') {
-            return venue.address
-              .toLowerCase()
-              .includes(value.toLowerCase());
-          }
-          if (key === 'capacity') {
-            return venue.capacity >= value;
-          }
-          if (key === 'price') {
-            return venue.pricing <= value;
-          }
-          return venue[key] === value;
-        });
-      });
-
-      // Display filtered venues
-      allVenues.empty();
-      displayVenues(filteredVenues);
-      app.popover.close('.popover-venue-filter', true);
-      setTimeout(() => {
+      }).open();
+      $('.apply-filters-btn').on('click', async () => {
         app.dialog.close();
-      }, 2000);
+        app.dialog.preloader();
+
+        // Get user's preferences
+        const locationFilter = $('#filter-location').val().trim();
+        const minCapacity = parseInt($('#filter-capacity').val(), 10);
+        const maxPrice = parseFloat($('#filter-price').val());
+
+        // Build filters object
+        const filters = {
+          location: locationFilter,
+          capacity: isNaN(minCapacity) ? null : minCapacity,
+          price: isNaN(maxPrice) ? null : maxPrice,
+        };
+
+        // Perform venue filtering
+        const filteredVenues = venues.filter(venue => {
+          return Object.keys(filters).every(key => {
+            const value = filters[key];
+            if (value === null || value === '') return true;
+
+            if (key === 'location') {
+              return venue.address
+                .toLowerCase()
+                .includes(value.toLowerCase());
+            }
+            if (key === 'capacity') {
+              return venue.capacity >= value;
+            }
+            if (key === 'price') {
+              return venue.pricing <= value;
+            }
+            return venue[key] === value;
+          });
+        });
+
+        // Display filtered venues
+        allVenues.empty();
+        displayVenues(filteredVenues);
+
+        setTimeout(() => {
+          app.dialog.close();
+        }, 2000);
+      });
     });
 
     // Close the preloader after a short delay
@@ -442,7 +471,7 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
       } else {
         const popover = app.popover.create({
           el: '.popover-add-image',
-          targetEl: '.open-popover', 
+          targetEl: '.open-popover',
         });
         popover.open();
       }
