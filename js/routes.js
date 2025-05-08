@@ -71,6 +71,12 @@ var routes = [
     name: 'edit-profile'
   },
 
+  {
+    path: '/dashboard/',
+    url: './pages/dashboard.html',
+    name: 'dashboard'
+  },
+
 
 
 

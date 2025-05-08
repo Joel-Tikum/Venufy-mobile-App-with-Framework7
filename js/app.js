@@ -59,6 +59,7 @@ let currentUser;
 let userData;
 let userPhotoPath;
 $(document).on('page:init', async function () {
+  app.panel.close('.panel-left', true);
 
   currentUser = JSON.parse(localStorage.getItem('currentUser'));
   userID = currentUser ? currentUser.userId : null;
@@ -69,7 +70,6 @@ $(document).on('page:init', async function () {
 
   $('.logout-btn').on('click', function () {
     app.preloader.show();
-    app.panel.close('.panel-left', true);
     localStorage.removeItem('logged-in');
     setTimeout(function () {
       app.views.main.router.navigate('/login/');
@@ -926,6 +926,38 @@ $(document).on('page:init', '.page[data-name="edit-profile"]', function (e, page
     }
 
   });
+
+});
+
+
+// dashboard page
+$(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
+  const ctx = $('#agent-chart')[0].getContext('2d');
+
+  // Create a new Chart instance
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Available', 'Busy', 'DND','Great'],
+        datasets: [{
+          data: [20, 45, 25, 10],
+          backgroundColor: [
+            app.theme === 'ios' ? '#ff3b30' : app.theme === 'md' ? '#f44336' : '#ff3b30', // red
+            app.theme === 'ios' ? '#ff9550' : app.theme === 'md' ? '#ff9800' : '#ff9550',  // orange
+            app.theme === 'ios' ? '#007aff' : app.theme === 'md' ? '#2196f3' : '#007aff', // blue
+            app.theme === 'ios' ? '#8E8E93' : app.theme === 'md' ? '#9E9E9E' : '#8E8E93'  // gray
+          ],
+          hoverOffset: 15,
+          cutout: '70%',
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: true },
+          tooltip: { enabled: true },
+        }
+      }
+    });
 
 });
 
