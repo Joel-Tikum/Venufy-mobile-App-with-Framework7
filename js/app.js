@@ -265,8 +265,8 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
 
     $('.open-venue-filter-dialog').on('click', function () {
       app.dialog.create({
-        title: 'Filter venues by your preferences',
         content: `
+                <p style="text-align:center;font-size:larger;">Filter venues by your preferences</p>
                 <div class="list no-hairlines-md">
                 <ul>
                       <li class="item-content item-input item-input-outline" style="height:60px">

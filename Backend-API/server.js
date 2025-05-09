@@ -1,20 +1,23 @@
 // server.js
-const express = require('express');
-const webPush = require('web-push');
-const cors = require('cors');
-const mysql = require('mysql2');
-const mysql1 = require('mysql2/promise');
-const multer = require('multer');
-const path = require('path');
+import express from 'express';
+import webPush from 'web-push';
+import cors from 'cors';
+import mysql from 'mysql2';
+import mysql1 from 'mysql2/promise';
+import multer from 'multer';
+import path from 'path';
 // const fs = require("fs");
-const fs1 = require('fs/promises');
-const nodemailer = require('nodemailer');
-const dotenv = require('dotenv');
+import fs1 from 'fs/promises';
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+import {fileURLToPath}  from 'url';
 
 dotenv.config();
 
 const app = express();
-const port = 3000; // You can choose any available port
+const port = 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(cors());
