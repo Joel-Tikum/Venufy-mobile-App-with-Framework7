@@ -13,8 +13,9 @@
             </div>
             <div class="title" style="margin-left: auto; color: white;">Dashboard</div>
             <div class="right">
-                <a href="#" class="link">
-                    <i class="icon f7-icons" style="color: white;">ellipsis_vertical</i>
+                <a href="/notifications/" class="link bell-icon" style="position: relative;">
+                    <i class="icon f7-icons" style="color: white;">bell</i>
+                    <span class="notification-dot" style="width: 12px; height: 12px; position: absolute; transform: translate(50%, -50%); top: 10; right: 18; background-color: red; border-radius: 50%; border: 2px solid white;"></span>
                 </a>
             </div>
         </div>
@@ -23,12 +24,12 @@
     <!-- Page Content -->
     <div class="page-content">
         <!-- Section Title -->
-        <div class="block-title" style="margin-top: 5px; font-size: 1em;">Monitoring Your Assets</div>
+        <div class="block-title" style="margin: 10px 5px 10px; font-size: large;">Monitoring Your Assets</div>
 
         <!-- Donut Chart Block -->
         <div class="block" style="position: relative; margin-bottom: 2px; height: 40%; width: 100%;display: flex; justify-content: center;">
             <canvas id="agent-chart"></canvas>
-            <h3 style="color:rgb(3, 80, 168);position: absolute;top: 50%;left: 52%;transform: translate(-50%, -50%);z-index: 2;font-size: 2em;text-align: center;">Venue Analyzer</h3>
+            <h3 style="color:rgb(3, 80, 168);position: absolute;top: 48%;left: 51%;transform: translate(-50%, -50%);z-index: 2;font-size: 2em;text-align: center;">Venue Analyzer</h3>
         </div>
 
         <!-- Legend -->
@@ -36,33 +37,21 @@
             <div class="row">
                 <div class="col-33 display-flex align-items-center">
                     <span class="badge color-blue margin-right"> </span>
-                    <div>
-                        <div>Visitors</div>
-                        <div class="text-small">50 visitors</div>
-                    </div>
+                    <div class="text-small">50 Visitors</div>
                 </div>
                 <div class="col-33 display-flex align-items-center margin-top">
                     <span class="badge color-green margin-right"> </span>
-                    <div>
-                        <div>Bookings</div>
-                        <div class="text-small">10 booking</div>
-                    </div>
+                    <div class="text-small">10 Booking</div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-33 display-flex align-items-center">
                     <span class="badge color-orange margin-right"> </span>
-                    <div>
-                        <div>Pending Transactions</div>
-                        <div class="text-small">40 Trans</div>
-                    </div>
+                    <div class="text-small">40 Pending Transactions</div>
                 </div>
                 <div class="col-33 display-flex align-items-center m margin-top">
                     <span class="badge color-red margin-right"> </span>
-                    <div>
-                        <div>Cancelled Bookings</div>
-                        <div class="text-small">5</div>
-                    </div>
+                    <div class="text-small">5 Cancelled Transactions</div>
                 </div>
             </div>
         </div>

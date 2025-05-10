@@ -76,6 +76,11 @@ var routes = [
     url: './pages/dashboard.html',
     name: 'dashboard'
   },
+  {
+    path: '/notifications/',
+    url: './pages/notifications.html',
+    name: 'notifications'
+  },
 
 
 

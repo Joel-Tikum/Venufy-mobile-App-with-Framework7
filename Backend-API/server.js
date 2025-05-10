@@ -106,12 +106,14 @@ async function sendVenueOwnerEmail(ownerEmail, eventData) {
     replyTo: 'no-reply@venufy.com',
     subject: `New booking for ${eventData.venueName}`,
     html: `
-      <h2>Your venue <u>${eventData.venueName}</u> has a new booking!</h2>
+      <h3 style="text-align:center;">Your venue <u>${eventData.venueName}</u> has a new booking!</h3">
       <center>
         <p><strong>Event Title:</strong> ${eventData.title}</p>
         <p><strong>Scheduled Date:</strong> ${eventData.date}</p>
         <p><strong>Created by:</strong> ${eventData.createdBy}</p>
       </center>
+      <p style="text-align:center;">Please return to ${eventData.venueName}'s pending events and approve the booking transaction.</p>
+      <p style="text-align:center;">Venufy prides in your progress 😊!</p>
     `,
   };
 

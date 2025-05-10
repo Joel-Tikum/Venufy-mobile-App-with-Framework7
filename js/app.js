@@ -7,6 +7,10 @@ var app = new Framework7({
 
   el: '#app', // App root element
 
+  colors: {
+    primary: '#578FCA',
+  },
+
   // App store
   store: store,
   // App routes
@@ -229,16 +233,20 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
       const listItem = document.createElement('div');
       listItem.innerHTML = `<a href="/venue/${venue.id}/${venue.owner}">
                               <div style="padding:5px; border-left: 1px solid #333; border-right: 1px solid #333; border-radius: 10px; background-color: #f0efef; color:#333; display:flex; gap:5px;">
-                                <img src="/venufy/Backend-API/${venue.image}" alt="${venue.name}" width="80" height="80" />
-                                <div class="item-inner">
+                                <img src="/venufy/Backend-API/${venue.image}" alt="${venue.name}" width="85" height="85" />
+                                <div class="item-inner" style="width:70%;">
                                   <div class="item-title-row align-items-center">
                                     <div>
-                                      <div class="item-title">${venue.name}</div>
-                                      <div class="item-subtitle">${venue.address}</div>
-                                      <div class="item-after text-color-green" style="font-weight:bold;">${venue.pricing} XAF</div>
+                                      <div class="item-title" style="color:#205781; font-weight:bold;">${venue.name}</div>
+                                      <div class="item-subtitle" style="color:#205781;">${venue.address}</div>
+                                      <div class="item-after" style="color:rgb(0, 128, 128); font-weight:semi-bold;">${venue.pricing} XAF</div>
                                     </div>
                                   </div>
                                 </div>
+                                <span class="badge display-flex align-items-center" style="--f7-badge-bg-color: transparent; color:orange; font-weight:bold; padding:5px 8px; gap:3px;">
+                                  <span style="font-size:12px;">4.5</span>
+                                  <i class="icon f7-icons" style="font-size: 1rem;">star</i>
+                                </span>
                               </div>
                             </a>`;
       listItem.setAttribute('class', 'block');
@@ -295,7 +303,7 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
                     </li>
                 </ul>
                 </div>
-                <button class="button button-raised margin-top apply-filters-btn"><i class="icon f7-icons">funnel</i> Apply Filter</button>
+                <button class="button button-raised margin-top apply-filters-btn" style="background-color:#40A2E3; color:white;"><i class="icon f7-icons">funnel</i> Apply Filter</button>
             `,
         cssClass: 'filter-dialog',
         backdrop: true,
@@ -346,14 +354,14 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
 
         setTimeout(() => {
           app.dialog.close();
-        }, 2000);
+        }, 1000);
       });
     });
 
     // Close the preloader after a short delay
     setTimeout(() => {
       app.dialog.close();
-    }, 2000);
+    }, 1000);
 
   } catch (error) {
     app.dialog.close();
@@ -707,7 +715,7 @@ $(document).on('page:init', '.page[data-name="create-event"]', async function (e
           closeButton: true,
           closeTimeout: 5000,
         }).open();
-        app.views.main.router.navigate('/home/');
+        app.views.main.router.navigate('/all-events/');
       });
     } catch (error) {
       app.preloader.hide();
@@ -774,7 +782,8 @@ async function displayEvents(events) {
         <div class="popover-inner">
             <div class="block">
                 <p class="text-align-center">${event.title}</p>
-                <button href="/events-update/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px;">Reschedule</button>
+                <button href="/event-booking/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px; background-color:#1F7D53; color:white;">Complete Venue Booking</button>
+                <button href="/events-update/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px;">Reschedule Event</button>
                 <button class="button button-raised delete-event-btn" style="margin-top: 15px; color:red;"><i class="icon f7-icons">trash</i> Delete Event</button>
             </div>
         </div>
@@ -798,10 +807,10 @@ async function displayEvents(events) {
     const listItem = document.createElement('div');
     listItem.innerHTML = `<a href="#" data-popover="#${popover.id}" class="link popover-open flex" style="width:100%; margin-bottom: 10px; background-color:rgb(243, 243, 243); color:#333;">
                                 <div class="flex" style="flex-direction:column; align-items:start; width:100%; height:auto;">
-                                  <h4 style="margin:1px;">${event.title}</h4>
-                                  <p style="margin:1px;">Event Date:  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
-                                  <p style="margin:1px;">Event Organizer:  ${organizer[0].fname} ${organizer[0].lname}</p>
-                                  <p style="margin:1px;">Event Location:  ${venue[0].name}, at ${venue[0].address}</p>
+                                  <h4 style="margin:1px; color:#205781;">${event.title}</h4>
+                                  <p style="margin:1px; color:#205781;">Event Date:  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
+                                  <p style="margin:1px; color:#205781;">Event Organizer:  ${organizer[0].fname} ${organizer[0].lname}</p>
+                                  <p style="margin:1px; color:#205781;">Event Location:  ${venue[0].name}, at ${venue[0].address}</p>
                                 </div>                     
                               </a>`;
 
@@ -938,14 +947,14 @@ $(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
     new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: ['Available', 'Busy', 'DND','Great'],
+        labels: ['Visitors', 'Bookings', 'Pending', 'Cancelled'],
         datasets: [{
           data: [20, 45, 25, 10],
           backgroundColor: [
-            app.theme === 'ios' ? '#ff3b30' : app.theme === 'md' ? '#f44336' : '#ff3b30', // red
-            app.theme === 'ios' ? '#ff9550' : app.theme === 'md' ? '#ff9800' : '#ff9550',  // orange
             app.theme === 'ios' ? '#007aff' : app.theme === 'md' ? '#2196f3' : '#007aff', // blue
-            app.theme === 'ios' ? '#8E8E93' : app.theme === 'md' ? '#9E9E9E' : '#8E8E93'  // gray
+            app.theme === 'ios' ? '#34C759' : app.theme === 'md' ? '#4CAF50' : '#34C759',  // green
+            app.theme === 'ios' ? '#8E8E93' : app.theme === 'md' ? '#9E9E9E' : '#8E8E93',  // gray
+            app.theme === 'ios' ? '#ff3b30' : app.theme === 'md' ? '#f44336' : '#ff3b30', // red
           ],
           hoverOffset: 15,
           cutout: '70%',
@@ -962,6 +971,10 @@ $(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
 });
 
 
+// Notifications page
+$(document).on('page:init', '.page[data-name="notifications"]', function (e, page) {
+
+});
 
 
 
@@ -971,4 +984,6 @@ $(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
 
 
 
-$(document).on('page:init', '.page[data-name="page-name"]', function (e, page) { });
+
+
+$(document).on('page:init', '.page[data-name="page-name"]', function (e, page) {});
