@@ -1,7 +1,7 @@
 
 var routes = [
   {
-    path: '/',
+    path: '/splash/',
     url: './pages/splash.html',
     name: 'splash'
   },
@@ -64,6 +64,11 @@ var routes = [
     name: 'create-event'
   },
 
+  {
+    path: '/',
+    url: './pages/profile.html',
+    name: 'profile'
+  },
 
   {
     path: '/edit-profile/',
@@ -76,11 +81,14 @@ var routes = [
     url: './pages/dashboard.html',
     name: 'dashboard'
   },
+
   {
     path: '/notifications/',
     url: './pages/notifications.html',
     name: 'notifications'
   },
+
+  
 
 
 

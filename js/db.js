@@ -364,6 +364,47 @@ export async function deleteEventById(eventId) {
 }
 
 
+// Create notifications
+export async function createNotification(notification) {
+  try {
+    const response = await fetch(`${base_URL}/notifications/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(notification),
+    });
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error creating notification:', error);
+    throw error;
+  }
+}
+
+
+// Get user's notifications
+export async function getUserNotifications(userId) {
+  try {
+    const response = await fetch(`${base_URL}/notifications/${userId}`);
+    if (!response.ok) {
+      // Extract error message from the response body
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Network response was not ok');
+    }
+    const notifications = await response.json();
+    return notifications;
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+    // Optionally, rethrow the error or return a default value
+    throw error;
+  }
+}
+
+
+
+
+
 
 
 

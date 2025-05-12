@@ -37,6 +37,7 @@ const venue_storage = multer.diskStorage({
   }
 });
 
+
 const user_storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'images/users'); // Ensure this directory exists and has proper permissions
@@ -46,6 +47,8 @@ const user_storage = multer.diskStorage({
     cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
+
+
 const upload_venue_image = multer({ storage: venue_storage });
 const upload_user_photo = multer({ storage: user_storage });
 let imagePath;
@@ -134,6 +137,15 @@ app.post('/send-notification', (req, res) => {
     .then(response => res.status(200).json({ message: 'Notification sent!', response }))
     .catch(error => res.status(500).json({ error }));
 });
+
+// Example endpoint for subscribing to notifications
+app.post('/subscribe', (req, res) => {
+  const subscription = req.body;
+  // Store subscription in database or in-memory store
+  console.log('New subscription:', subscription);
+  res.status(201).json({ message: 'Subscribed successfully!' });
+});
+
 
 // POST: Create a new user
 app.post('/users/create', (req, res) => {
@@ -423,6 +435,35 @@ app.delete('/events/delete/:eventId', (req, res) => {
       res.status(404).json({ message: 'Event not found' });
     } else {
       res.json({ message: 'Event deleted successfully' });
+    }
+  });
+});
+
+
+// POST: Create a new notification
+app.post('/notifications/create', (req, res) => {
+  const { initiator_id, receiver_id, type, message } = req.body;
+  const sql = 'INSERT INTO v_notifications (initiator_id, receiver_id, type, message) VALUES (?, ?)';
+  pool.query(sql, [initiator_id, receiver_id, type, message], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json({ message: 'Notification created successfully', notificationId: result.insertId });
+    }
+  });
+});
+
+
+// GET: Retrieve all notifications for a user
+app.get('/notifications/:userId', (req, res) => {
+  const userId = req.params.userId;
+  pool.query('SELECT * FROM v_notifications WHERE receiver_id = ?', [userId], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json(results);
     }
   });
 });

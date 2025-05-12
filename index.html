@@ -67,24 +67,31 @@
                         <i class="icon f7-icons">circle_grid_hex_fill</i>
                         Dashboard
                     </a>
-                    <a href="/edit-profile/" panel-close>
+                    <a href="/profile/" panel-close>
                         <i class="icon f7-icons">pencil</i>
-                        Edit Account
+                        My Profile
                     </a>
-                    <a href="/notification/" panel-close>
+                    <a href="/notifications/" panel-close>
                         <i class="icon f7-icons">bell</i>
-                        Notification
+                        Notifications
                     </a>
                     <a href="/settings/" panel-close>
                         <i class="icon f7-icons">gear_alt</i>
-                        Setting
+                        Settings
+                    </a>
+                    <a href="#" class="show-actions">
+                        <i class="icon f7-icons">exclamationmark_octagon</i>
+                        Actions
                     </a>
                 </div>
-                <div class="block" style="margin-bottom: -50px !important;">
-                    <a href="#" class="button button-outline button-round display-block logout-btn" panel-close>
+                <div class="block padding danger-zone" style="display: none; background-color: rgb(248, 168, 168); border-radius: 10px; margin: 0px 10px; ">
+                    <h3 class="margin-bottom">Danger Zone</h3>
+                    <a href="#" class="button button-outline button-round margin-bottom logout-btn " style="background-color: white;" panel-close>
                         <i class="icon f7-icons">square_arrow_left</i>
                         Logout
                     </a>
+
+                    <button class="button button-raised button-round color-red delete-account-btn " style="background-color: white;" panel-close><i class="icon f7-icons">trash</i> Delete Account</button>
                 </div>
             </div>
         </div>
@@ -96,7 +103,7 @@
     <!-- Framework7 library -->
     <script src="framework7/framework7-bundle.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
 
 
     <!-- App routes -->

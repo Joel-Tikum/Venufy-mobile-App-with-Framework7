@@ -52,8 +52,8 @@ import {
   initDB, addUser, createUser, getUserByUsername, fetchAllVenues, createVenue,
   venueImage, fetchVenueById, fetchAllImages, addImage, deleteVenueById,
   updateVenue, createEvent, fetchAllEvents, fetchUserById, fetchEventsByVenueId,
-  updateUser, fetchEventsByOrganizerId, deleteDB,
-  deleteEventById,
+  updateUser, fetchEventsByOrganizerId, createNotification, getUserNotifications, 
+  deleteEventById, deleteDB,
 } from './db.js';
 
 
@@ -79,6 +79,10 @@ $(document).on('page:init', async function () {
       app.views.main.router.navigate('/login/');
       app.preloader.hide();
     }, 3000);
+  });
+
+  $('.show-actions').on('click', () => {
+    $('.danger-zone')[0].style.display = 'block';
   });
 
   $('.user-photo')[0].src = (userData[0].photo.length == 0) ? '/venufy/assets/me.jpg' : `/venufy/Backend-API/${userPhotoPath}`;
@@ -770,6 +774,7 @@ async function displayEvents(events) {
     // Retrieve the event organizer's information
     const organizer = await fetchUserById(event.organizer);
     const venue = await fetchVenueById(event.venueId);
+    
 
     // Create a unique popover element for each event
     const popover = document.createElement('div');
@@ -805,7 +810,7 @@ async function displayEvents(events) {
 
     // Create the event list item
     const listItem = document.createElement('div');
-    listItem.innerHTML = `<a href="#" data-popover="#${popover.id}" class="link popover-open flex" style="width:100%; margin-bottom: 10px; background-color:rgb(243, 243, 243); color:#333;">
+    listItem.innerHTML = `<a href="#" data-popover="#${popover.id}" class="item-link popover-open flex" style="width:100%; margin-bottom: 20px; background-color:rgb(243, 243, 243); color:#333;">
                                 <div class="flex" style="flex-direction:column; align-items:start; width:100%; height:auto;">
                                   <h4 style="margin:1px; color:#205781;">${event.title}</h4>
                                   <p style="margin:1px; color:#205781;">Event Date:  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
@@ -971,10 +976,19 @@ $(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
 });
 
 
+// User profile page
+$(document).on('page:init', '.page[data-name="profile"]', function (e, page) {
+ 
+});
+
+
 // Notifications page
 $(document).on('page:init', '.page[data-name="notifications"]', function (e, page) {
 
 });
+
+
+
 
 
 
