@@ -26,14 +26,8 @@
         <!-- Section Title -->
         <div class="block-title" style="margin: 10px 5px 10px; font-size: large;">Monitoring Your Assets</div>
 
-        <!-- Donut Chart Block -->
-        <div class="block" style="position: relative; margin-bottom: 2px; height: 40%; width: 100%;display: flex; justify-content: center;">
-            <canvas id="agent-chart"></canvas>
-            <h3 style="color:rgb(3, 80, 168);position: absolute;top: 48%;left: 51%;transform: translate(-50%, -50%);z-index: 2;font-size: 2em;text-align: center;">Venue Analyzer</h3>
-        </div>
-
-        <!-- Legend -->
-        <div class="block" style="display: flex; justify-content: space-around; margin-top: 0px;">
+                <!-- Legend -->
+        <div class="block" style="display: flex; justify-content: space-around; margin: 0px;">
             <div class="row">
                 <div class="col-33 display-flex align-items-center">
                     <span class="badge color-blue margin-right"> </span>
@@ -46,7 +40,7 @@
             </div>
             <div class="row">
                 <div class="col-33 display-flex align-items-center">
-                    <span class="badge color-orange margin-right"> </span>
+                    <span class="badge color-yellow margin-right"> </span>
                     <div class="text-small">40 Pending Transactions</div>
                 </div>
                 <div class="col-33 display-flex align-items-center m margin-top">
@@ -54,6 +48,22 @@
                     <div class="text-small">5 Cancelled Transactions</div>
                 </div>
             </div>
+        </div>
+
+        <!-- Donut Pie Chart Block -->
+        <div class="block" style="position: relative; margin-bottom: 2px; height: 30%; width: 100%;display: flex; justify-content: center;">
+            <canvas class="piechart"></canvas>
+            <h3 style="color:rgb(3, 80, 168);position: absolute;top: 30%;left: 51%;transform: translate(-50%, -50%);z-index: 2;font-size: 2em;text-align: center;">Venue Analyzer</h3>
+        </div>
+
+
+
+        <!-- Section Title -->
+        <div class="block-title" style="margin:20px 5px 10px; font-size: large;">Monitoring Your Transactions</div>
+
+        <!-- Donut Bar Chart Block -->
+        <div class="block" style="height: auto; width: 100%;display: flex; justify-content: center;">
+            <canvas class="barchart"></canvas>
         </div>
 
     </div>

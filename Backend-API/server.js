@@ -410,20 +410,6 @@ app.get("/events/:id", (req, res) => {
 });
 
 
-// Retrieve all events created by a given user
-app.get("/user/events/:userId", (req, res) => {
-  const userId = req.params.userId;
-  pool.query("SELECT * FROM v_events WHERE organizer = ?", [userId], (err, rows) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Database error' });
-    } else {
-      res.json(rows);
-    }
-  });
-});
-
-
 // deleting an event by eventId
 app.delete('/events/delete/:eventId', (req, res) => {
   const eventId = req.params.eventId;
@@ -443,7 +429,7 @@ app.delete('/events/delete/:eventId', (req, res) => {
 // POST: Create a new notification
 app.post('/notifications/create', (req, res) => {
   const { initiator_id, receiver_id, type, message } = req.body;
-  const sql = 'INSERT INTO v_notifications (initiator_id, receiver_id, type, message) VALUES (?, ?)';
+  const sql = 'INSERT INTO v_notifications (initiator_id, receiver_id, type, message) VALUES (?, ?, ?, ?)';
   pool.query(sql, [initiator_id, receiver_id, type, message], (err, result) => {
     if (err) {
       console.error(err);

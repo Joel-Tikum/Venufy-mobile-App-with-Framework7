@@ -1,7 +1,7 @@
 
 var routes = [
   {
-    path: '/splash/',
+    path: '/',
     url: './pages/splash.html',
     name: 'splash'
   },
@@ -65,14 +65,14 @@ var routes = [
   },
 
   {
-    path: '/',
+    path: '/profile/',
     url: './pages/profile.html',
     name: 'profile'
   },
 
   {
     path: '/edit-profile/',
-    componentUrl: './pages/edit-profile.html',
+    url: './pages/edit-profile.html',
     name: 'edit-profile'
   },
 
@@ -86,6 +86,12 @@ var routes = [
     path: '/notifications/',
     url: './pages/notifications.html',
     name: 'notifications'
+  },
+
+  {
+    path: '/payment/:id',
+    componentUrl: './pages/payment.html',
+    name: 'payment'
   },
 
   

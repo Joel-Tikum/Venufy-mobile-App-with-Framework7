@@ -52,7 +52,7 @@ import {
   initDB, addUser, createUser, getUserByUsername, fetchAllVenues, createVenue,
   venueImage, fetchVenueById, fetchAllImages, addImage, deleteVenueById,
   updateVenue, createEvent, fetchAllEvents, fetchUserById, fetchEventsByVenueId,
-  updateUser, fetchEventsByOrganizerId, createNotification, getUserNotifications, 
+  updateUser, createNotification, getUserNotifications,
   deleteEventById, deleteDB,
 } from './db.js';
 
@@ -62,6 +62,9 @@ let userID;
 let currentUser;
 let userData;
 let userPhotoPath;
+let userEvents = [];
+let userVenues = [];
+
 $(document).on('page:init', async function () {
   app.panel.close('.panel-left', true);
 
@@ -88,7 +91,6 @@ $(document).on('page:init', async function () {
   $('.user-photo')[0].src = (userData[0].photo.length == 0) ? '/venufy/assets/me.jpg' : `/venufy/Backend-API/${userPhotoPath}`;
   $('.user-names')[0].innerHTML = `${userData[0].fname} ${userData[0].lname}`;
   $('.user-contact')[0].innerHTML = `${userData[0].contact}`;
-
 });
 
 
@@ -213,13 +215,13 @@ $(document).on('page:init', '.page[data-name="login"]', function (e, page) {
 
 // Home page for venue listing
 $(document).on('page:init', '.page[data-name="home"]', async function (e, page) {
+  e.preventDefault();
   app.dialog.preloader();
 
   const allVenues = $('.all-venues');
   const popularVenues = $('.popular-venues');
   const noItemBlock2 = $('.no-item-popular');
   let venueList;
-  let numberOfVenues = 0;
 
   function displayVenues(venues) {
     // Loop through venues and create list items
@@ -230,7 +232,7 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
       }
 
       if (userID == venue.owner) {
-        numberOfVenues++;
+        if (userVenues.length < 2) { userVenues.push(venue); }
       }
 
       // Create a list item for each venue
@@ -268,7 +270,7 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
 
     // Check if the user has created any venues
     $('.create-venue').on('click', function () {
-      if (numberOfVenues == 2) {
+      if (userVenues.length == 2) {
         app.dialog.alert('You have reached the maximum of two venues! Consider subscribing to premium in order to create more venues', 'Alert !!');
       } else {
         app.views.main.router.navigate('/create-venue/');
@@ -355,14 +357,12 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
         // Display filtered venues
         allVenues.empty();
         displayVenues(filteredVenues);
-
         setTimeout(() => {
           app.dialog.close();
         }, 1000);
       });
     });
 
-    // Close the preloader after a short delay
     setTimeout(() => {
       app.dialog.close();
     }, 1000);
@@ -466,7 +466,6 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
   try {
     const venue = await fetchVenueById(id);
     const images = await fetchAllImages(id);
-    const userEvents = await fetchEventsByOrganizerId(userID);
 
     if (owner == userID) {
       addEventBtn[0].style.display = "none";
@@ -515,9 +514,9 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
 
       swipperEl[0].appendChild(listItem);
     });
-    setTimeout(() => {
-      app.dialog.close();
-    }, 2000);
+
+    app.dialog.close();
+
   } catch (error) {
     app.dialog.close();
     app.dialog.alert('Error retrieving venue details: ' + error, 'Error');
@@ -774,7 +773,7 @@ async function displayEvents(events) {
     // Retrieve the event organizer's information
     const organizer = await fetchUserById(event.organizer);
     const venue = await fetchVenueById(event.venueId);
-    
+
 
     // Create a unique popover element for each event
     const popover = document.createElement('div');
@@ -782,13 +781,14 @@ async function displayEvents(events) {
     popover.id = `popover-${event.id}`; // Assign a unique ID
 
     // Set the inner HTML for the popover
-    if (userID == organizer[0].id) {
+    if (userID == event.organizer) {
+      if (userEvents.length < 2) { userEvents.push(event); }
       popover.innerHTML = `
         <div class="popover-inner">
             <div class="block">
                 <p class="text-align-center">${event.title}</p>
-                <button href="/event-booking/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px; background-color:#1F7D53; color:white;">Complete Venue Booking</button>
-                <button href="/events-update/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px;">Reschedule Event</button>
+                <a href="/payment/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px; background-color:#1F7D53; color:white;">Complete Venue Booking</a>
+                <a href="/events-update/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px;">Reschedule Event</a>
                 <button class="button button-raised delete-event-btn" style="margin-top: 15px; color:red;"><i class="icon f7-icons">trash</i> Delete Event</button>
             </div>
         </div>
@@ -810,13 +810,13 @@ async function displayEvents(events) {
 
     // Create the event list item
     const listItem = document.createElement('div');
-    listItem.innerHTML = `<a href="#" data-popover="#${popover.id}" class="item-link popover-open flex" style="width:100%; margin-bottom: 20px; background-color:rgb(243, 243, 243); color:#333;">
-                                <div class="flex" style="flex-direction:column; align-items:start; width:100%; height:auto;">
-                                  <h4 style="margin:1px; color:#205781;">${event.title}</h4>
-                                  <p style="margin:1px; color:#205781;">Event Date:  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
-                                  <p style="margin:1px; color:#205781;">Event Organizer:  ${organizer[0].fname} ${organizer[0].lname}</p>
-                                  <p style="margin:1px; color:#205781;">Event Location:  ${venue[0].name}, at ${venue[0].address}</p>
-                                </div>                     
+    listItem.innerHTML = `<a href="#" data-popover="#${popover.id}" class="item-link popover-open" style="width:100%; margin-bottom: 20px; background-color:rgb(243, 243, 243); color:#333;">
+                                <div class="flex" style="flex-direction:column; align-items:start; width:100%; height:auto; border-left: 1px solid #333; border-bottom: 1px solid #333; border-radius: 10px; padding:5px;">
+                                  <p style="margin:1px; color:#205781;">Event Title : <span style="font-weight:bold;">${event.title}</span></p>
+                                  <p style="margin:1px; color:#205781;">Date :  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
+                                  <p style="margin:1px; color:#205781;">Organizer :  ${organizer[0].fname} ${organizer[0].lname}</p>
+                                  <p style="margin:1px; color:#205781;">Location :  ${venue[0].name}, at ${venue[0].address}</p>
+                                </div>                
                               </a>`;
 
     listItem.setAttribute('class', 'block');
@@ -842,6 +842,7 @@ async function displayEvents(events) {
   app.dialog.close();
 
 }
+
 
 
 // All events page
@@ -874,12 +875,35 @@ $(document).on('page:init', '.page[data-name="all-venue-events"]', async functio
 });
 
 
+// User profile page
+$(document).on('page:init', '.page[data-name="profile"]', function (e, page) {
+  $('.user-email')[0].innerHTML = `${userData[0].email}`;
+  $('.number-of-venues')[0].innerHTML = userVenues.length;
+  $('.number-of-events')[0].innerHTML = userEvents.length;
+
+  const user_venues = $('.user-venues')[0];
+  const user_events = $('.user-events')[0];
+
+  userVenues.forEach(venue => {
+    const listItem = document.createElement('li');
+    listItem.innerHTML = venue.name;
+    user_venues.appendChild(listItem);
+  });
+  userEvents.forEach(event => {
+    const listItem = document.createElement('li');
+    listItem.innerHTML = event.title;
+    user_events.appendChild(listItem);
+  });
+
+});
+
+
 // Edit profile page
 $(document).on('page:init', '.page[data-name="edit-profile"]', function (e, page) {
   app.panel.close('.panel-left', true);
   app.preloader.show();
 
-  let userPhoto = null;
+  let userPhoto;
 
   // When a new file is chosen, read & preview it
   $('#profilePic').on('change', function (e) {
@@ -946,39 +970,81 @@ $(document).on('page:init', '.page[data-name="edit-profile"]', function (e, page
 
 // dashboard page
 $(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
-  const ctx = $('#agent-chart')[0].getContext('2d');
+  const piechart = $('.piechart')[0].getContext('2d');
+  const barchart = $('.barchart')[0].getContext('2d');
 
   // Create a new Chart instance
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Visitors', 'Bookings', 'Pending', 'Cancelled'],
-        datasets: [{
-          data: [20, 45, 25, 10],
-          backgroundColor: [
-            app.theme === 'ios' ? '#007aff' : app.theme === 'md' ? '#2196f3' : '#007aff', // blue
-            app.theme === 'ios' ? '#34C759' : app.theme === 'md' ? '#4CAF50' : '#34C759',  // green
-            app.theme === 'ios' ? '#8E8E93' : app.theme === 'md' ? '#9E9E9E' : '#8E8E93',  // gray
-            app.theme === 'ios' ? '#ff3b30' : app.theme === 'md' ? '#f44336' : '#ff3b30', // red
-          ],
-          hoverOffset: 15,
-          cutout: '70%',
-        }]
-      },
-      options: {
-        plugins: {
-          legend: { display: true },
-          tooltip: { enabled: true },
-        }
+  new Chart(piechart, {
+    type: 'doughnut',
+    data: {
+      labels: ['Visitors', 'Bookings', 'Pending', 'Cancelled'],
+      datasets: [{
+        data: [20, 45, 25, 10],
+        backgroundColor: [
+          app.theme === 'ios' ? '#007aff' : app.theme === 'md' ? '#2196f3' : '#007aff', // blue
+          app.theme === 'ios' ? '#34C759' : app.theme === 'md' ? '#4CAF50' : '#34C759',  // green
+          app.theme === 'ios' ? '#8E8E93' : app.theme === 'md' ? '#9E9E9E' : '#8E8E93',  // gray
+          app.theme === 'ios' ? '#ff3b30' : app.theme === 'md' ? '#f44336' : '#ff3b30', // red
+        ],
+        hoverOffset: 15,
+        cutout: '70%',
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true },
       }
-    });
+    }
+  });
 
-});
+  // Create a new Bar Chart instance
+  new Chart(barchart, {
+    type: 'bar',
+    data: {
+      labels: ['Visitors', 'Bookings', 'Pending', 'Cancelled'],
+      datasets: [{
+        label: 'Status Breakdown',
+        data: [20, 45, 25, 10],
+        backgroundColor: [
+          app.theme === 'ios' ? '#007aff' : app.theme === 'md' ? '#2196f3' : '#007aff', // blue
+          app.theme === 'ios' ? '#34C759' : app.theme === 'md' ? '#4CAF50' : '#34C759', // green
+          app.theme === 'ios' ? '#8E8E93' : app.theme === 'md' ? '#9E9E9E' : '#8E8E93', // gray
+          app.theme === 'ios' ? '#ff3b30' : app.theme === 'md' ? '#f44336' : '#ff3b30', // red
+        ],
+        borderColor: [
+          app.theme === 'ios' ? '#0051c7' : app.theme === 'md' ? '#1976d2' : '#0051c7',
+          app.theme === 'ios' ? '#28a745' : app.theme === 'md' ? '#388e3c' : '#28a745',
+          app.theme === 'ios' ? '#6e6e73' : app.theme === 'md' ? '#757575' : '#6e6e73',
+          app.theme === 'ios' ? '#c12f2f' : app.theme === 'md' ? '#d32f2f' : '#c12f2f',
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Category'
+          }
+        },
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Count'
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true }
+      }
+    }
+  });
 
 
-// User profile page
-$(document).on('page:init', '.page[data-name="profile"]', function (e, page) {
- 
 });
 
 
@@ -988,6 +1054,40 @@ $(document).on('page:init', '.page[data-name="notifications"]', function (e, pag
 });
 
 
+// Payment page
+$(document).on('page:init', '.page[data-name="payment"]', function (e, page) {
+
+  let { id } = page.route.params;  // the event's id
+  console.log(id);
+
+  let paymentForm = $('.payment-form');
+
+  paymentForm.on('submit', async (e) => {
+    e.preventDefault();
+    app.preloader.show();
+
+    let paymentMethod = $('#payment-method').val();
+    let amount = $('#amount').val();
+
+    const payment = {
+      eventId: eventId,
+      method: paymentMethod,
+      amount: amount
+    };
+
+    try {
+      await makePayment(payment);
+      app.preloader.hide();
+      app.dialog.alert('Payment was successful!', 'Success', () => {
+        app.views.main.router.navigate('/home/');
+      });
+    } catch (error) {
+      app.preloader.hide();
+      app.dialog.alert('Error making payment: ' + error, 'Error');
+    }
+  });
+
+});
 
 
 
@@ -1000,4 +1100,6 @@ $(document).on('page:init', '.page[data-name="notifications"]', function (e, pag
 
 
 
-$(document).on('page:init', '.page[data-name="page-name"]', function (e, page) {});
+
+
+$(document).on('page:init', '.page[data-name="page-name"]', function (e, page) { });

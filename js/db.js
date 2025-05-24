@@ -325,25 +325,6 @@ export async function fetchEventsByVenueId(venueId) {
 }
 
 
-// Fetching all events for a specific organizer
-export async function fetchEventsByOrganizerId(userId) {
-  try {
-    const response = await fetch(`${base_URL}/user/events/${userId}`);
-    if (!response.ok) {
-      // Extract error message from the response body
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Network response was not ok');
-    }
-    const events = await response.json();
-    return events;
-  } catch (error) {
-    console.error('There was a problem with the fetch operation:', error);
-    // Optionally, rethrow the error or return a default value
-    throw error;
-  }
-}
-
-
 // Deleting event by eventId
 export async function deleteEventById(eventId) { 
   try {
