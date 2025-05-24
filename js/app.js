@@ -52,7 +52,7 @@ import {
   initDB, addUser, createUser, getUserByUsername, fetchAllVenues, createVenue,
   venueImage, fetchVenueById, fetchAllImages, addImage, deleteVenueById,
   updateVenue, createEvent, fetchAllEvents, fetchUserById, fetchEventsByVenueId,
-  updateUser, createNotification, getUserNotifications,
+  updateUser, createNotification, getUserNotifications, testPayment,
   deleteEventById, deleteDB,
 } from './db.js';
 
@@ -1058,7 +1058,6 @@ $(document).on('page:init', '.page[data-name="notifications"]', function (e, pag
 $(document).on('page:init', '.page[data-name="payment"]', function (e, page) {
 
   let { id } = page.route.params;  // the event's id
-  console.log(id);
 
   let paymentForm = $('.payment-form');
 
@@ -1070,13 +1069,13 @@ $(document).on('page:init', '.page[data-name="payment"]', function (e, page) {
     let amount = $('#amount').val();
 
     const payment = {
-      eventId: eventId,
+      eventId: id,
       method: paymentMethod,
       amount: amount
     };
 
     try {
-      await makePayment(payment);
+      await testPayment();
       app.preloader.hide();
       app.dialog.alert('Payment was successful!', 'Success', () => {
         app.views.main.router.navigate('/home/');

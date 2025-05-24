@@ -12,6 +12,8 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import {fileURLToPath}  from 'url';
 
+import { initiatePayment } from './venufy-payments.js';
+
 dotenv.config();
 
 const app = express();
@@ -452,6 +454,15 @@ app.get('/notifications/:userId', (req, res) => {
       res.json(results);
     }
   });
+});
+
+
+
+
+
+app.get('/venufy-payments', async (req, res) => {
+  let resp = initiatePayment();
+  res.json(resp);
 });
 
 

@@ -388,6 +388,30 @@ export async function getUserNotifications(userId) {
 
 
 
+// testing the payment API
+export async function testPayment() {
+  try {
+    const response = await fetch(`${base_URL}/venufy-payments`);
+    if (!response.ok) {
+      // Extract error message from the response body
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Network response was not ok');
+    }
+    const notifications = await response.json();
+    return notifications;
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+    // Optionally, rethrow the error or return a default value
+    throw error;
+  }
+}
+
+
+
+
+
+
+
 
 
 
