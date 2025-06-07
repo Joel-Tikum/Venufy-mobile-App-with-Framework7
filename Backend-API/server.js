@@ -10,9 +10,9 @@ import path from 'path';
 import fs1 from 'fs/promises';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import {fileURLToPath}  from 'url';
+import { fileURLToPath } from 'url';
 
-import { initiatePayment } from './venufy-payments.js';
+import fapshi from './fapshi.js';
 
 dotenv.config();
 
@@ -97,17 +97,17 @@ webPush.setVapidDetails(
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,     // e.g., smtp.mailtrap.io
   port: Number(process.env.SMTP_PORT),
-  secure: false, 
+  secure: false,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
 });
 // Emailing function
-async function sendVenueOwnerEmail(ownerEmail, eventData) {
+async function sendVenueOwnerEmail(eventData) {
   const mailOptions = {
     from: '"Venufy Notification" <no-reply@venufy.com>',
-    to: ownerEmail,
+    to: eventData.ownerEmail,
     replyTo: 'no-reply@venufy.com',
     subject: `New booking for ${eventData.venueName}`,
     html: `
@@ -117,7 +117,7 @@ async function sendVenueOwnerEmail(ownerEmail, eventData) {
         <p><strong>Scheduled Date:</strong> ${eventData.date}</p>
         <p><strong>Created by:</strong> ${eventData.createdBy}</p>
       </center>
-      <p style="text-align:center;">Please return to ${eventData.venueName}'s pending events and approve the booking transaction.</p>
+      <p style="text-align:center;">Please ensure to return to Venufy and check your notifications to approve this transaction and withdraw your funds 💰. This should be done at most two days after the scheduled date, otherwise, you'll incur additional charges.  </p>
       <p style="text-align:center;">Venufy prides in your progress 😊!</p>
     `,
   };
@@ -162,6 +162,7 @@ app.post('/users/create', (req, res) => {
     }
   });
 });
+
 
 // GET: Retrieve all users
 app.get('/users/all-users', (req, res) => {
@@ -266,6 +267,20 @@ app.get("/venues/:id", (req, res) => {
   });
 });
 
+
+// Retrieve a specific owner by id
+app.get("/venues/user-venues/:id", (req, res) => {
+  const userId = req.params.id;
+  pool.query("SELECT * FROM v_venues WHERE owner = ?", [userId], (err, rows) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
 // Delete a venue by id and all associated images and events will be deleted
 // Directory where images are stored
 const IMAGE_DIR = path.join(__dirname);
@@ -359,8 +374,8 @@ app.get("/venue-images/:id", (req, res) => {
 
 // POST: Create a new event and notify venue owner
 app.post('/events/create', async (req, res) => {
-  
-  const { venueId, organizer, title, description, date, venueName, ownerEmail, organizerName} = req.body;
+
+  const { venueId, organizer, title, description, date } = req.body;
   try {
     // 1. Insert the new event into v_events
     const sql = 'INSERT INTO v_events (venueId, organizer, title, description, date) VALUES (?, ?, ?, ?, ?)';
@@ -369,14 +384,11 @@ app.post('/events/create', async (req, res) => {
         console.error(err);
         return res.status(500).json({ error: 'Database error' });
       }
-   
-    // 2. Send notification email to the venue owner
-    await sendVenueOwnerEmail(ownerEmail, {title, date, venueName, createdBy: organizerName,}); // sendMail returns a promise :contentReference[oaicite:5]{index=5}
 
-    // 3. Respond to the client
-    res
-      .status(201)
-      .json({ message: 'Event created and owner notified', eventId: insertResult.insertId });
+      // 2. Respond to the client
+      res
+        .status(201)
+        .json({ message: 'Event created and owner notified', eventId: insertResult.insertId });
     });
   } catch (error) {
     console.error('Error creating event or sending email:', error);
@@ -402,6 +414,34 @@ app.get("/events", (req, res) => {
 app.get("/events/:id", (req, res) => {
   const venueId = req.params.id;
   pool.query("SELECT * FROM v_events WHERE venueId = ?", [venueId], (err, rows) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+
+// Retrieve a specific venue by id
+app.get("/events/event/:id", (req, res) => {
+  const eventId = req.params.id;
+  pool.query("SELECT * FROM v_events WHERE id = ?", [eventId], (err, rows) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+
+// Retrieve a specific user by id
+app.get("/events/user-events/:id", (req, res) => {
+  const userId = req.params.id;
+  pool.query("SELECT * FROM v_events WHERE organizer = ?", [userId], (err, rows) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Database error' });
@@ -446,7 +486,7 @@ app.post('/notifications/create', (req, res) => {
 // GET: Retrieve all notifications for a user
 app.get('/notifications/:userId', (req, res) => {
   const userId = req.params.userId;
-  pool.query('SELECT * FROM v_notifications WHERE receiver_id = ?', [userId], (err, results) => {
+  pool.query('SELECT * FROM v_notifications WHERE receiver_id = ? ORDER BY created_on DESC', [userId], (err, results) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Database error' });
@@ -457,13 +497,89 @@ app.get('/notifications/:userId', (req, res) => {
 });
 
 
-
-
-
-app.get('/venufy-payments', async (req, res) => {
-  let resp = initiatePayment();
-  res.json(resp);
+// GET: Retrieve unread notifications for a user
+app.get('/notifications/unread/:userId', (req, res) => {
+  const userId = req.params.userId;
+  pool.query('SELECT * FROM v_notifications WHERE receiver_id = ? AND status = ? ORDER BY created_on DESC', [userId, 0], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json(results);
+    }
+  });
 });
+
+// PATCH: Mark notification as read
+app.patch('/notifications/mark-read/:notificationId', (req, res) => {
+  const notificationId = req.params.notificationId;
+  const sql = 'UPDATE v_notifications SET status = 1 WHERE id = ?';
+  pool.query(sql, [notificationId], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json({ message: 'Notification marked as read', affectedRows: result.affectedRows });
+    }
+  });
+});
+
+
+// Prompting the user to confirm payment initiation
+app.post('/payment/prompt-user-to-pay', async (req, res) => {
+
+  const { amount, phone, email, eventOrganizerId, eventOrganizerName, eventId, message, eventTitle, eventDate, venueId, venueName, venueOwnerEmail } = req.body;
+  const paymentData = {
+    amount: amount,
+    phone: phone,
+    email: email,
+    userId: eventOrganizerId,
+    externalId: eventId,
+    message: message
+  }
+
+  const emailData = {
+    ownerEmail: venueOwnerEmail,
+    title: eventTitle,
+    date: eventDate,
+    venueName: venueName,
+    createdBy: eventOrganizerName,
+  }
+
+  console.log("Waiting for user to confirm payment initiation...");
+  let resp = await fapshi.directPay(paymentData);
+
+  if (!resp) {
+    return res.status(500).json({ error: 'Failed to initiate payment' });
+  } else {
+    console.log(resp);
+
+    if (resp.statusCode === 200) {
+      const transType = 'Payin';
+
+      const sql = 'INSERT INTO v_transactions (event_id, venue_id, payer_id, trans_id, trans_type, amount) VALUES (?, ?, ?, ?, ?, ?)';
+      pool.query(sql, [eventId, venueId, eventOrganizerId, resp.transId, transType, amount], async (err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).json({ error: 'Database error' });
+        } else {
+          await sendVenueOwnerEmail(emailData);
+          const sql = 'UPDATE v_events SET status = 1 WHERE id = ?';
+          pool.query(sql, [eventId], (err, result) => {
+            if (err) {
+              console.error(err);
+              res.status(500).json({ error: 'Database error' });
+            } else {
+              res.json({ message: 'Event successfully registered', affectedRows: result.affectedRows });
+            }
+          });
+        }
+      });
+    }
+  }
+});
+
+
 
 
 

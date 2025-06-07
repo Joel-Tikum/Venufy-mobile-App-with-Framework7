@@ -6,6 +6,19 @@
 import axios from 'axios';
 
 const baseUrl = 'https://sandbox.fapshi.com'
+
+// For venufy pay live mode
+// const headers =  {
+//     apiuser: '24a0dfe7-6894-4470-9a5c-d88aecbe6182',
+//     apikey: 'FAK_b977ce62d8fec150261fe86c0f9909b1'
+// }
+
+// For venufy collect live mode
+// const headers =  {
+//     apiuser: '5234328a-6642-4c31-887f-ba8c647e1b03',
+//     apikey: 'FAK_6d17da8679f7847b3df4b3855b393723'
+// }
+
 const headers =  {
     apiuser: '1dcddc70-4fec-4a74-b160-3d53bd851c72',
     apikey: 'FAK_TEST_708c953616302215a5b6'

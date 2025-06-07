@@ -50,9 +50,9 @@ var app = new Framework7({
 // Import statements
 import {
   initDB, addUser, createUser, getUserByUsername, fetchAllVenues, createVenue,
-  venueImage, fetchVenueById, fetchAllImages, addImage, deleteVenueById,
-  updateVenue, createEvent, fetchAllEvents, fetchUserById, fetchEventsByVenueId,
-  updateUser, createNotification, getUserNotifications, testPayment,
+  venueImage, fetchVenueById, fetchVenuesByOwnerId, fetchAllImages, addImage, deleteVenueById,
+  updateVenue, createEvent, fetchAllEvents, fetchUserById, fetchEventsByVenueId, fetchEventById, fetchEventsByOrganizerId,
+  updateUser, createNotification, getUserNotifications, getUnreadNotifications, promptingUserToPay,
   deleteEventById, deleteDB,
 } from './db.js';
 
@@ -62,8 +62,6 @@ let userID;
 let currentUser;
 let userData;
 let userPhotoPath;
-let userEvents = [];
-let userVenues = [];
 
 $(document).on('page:init', async function () {
   app.panel.close('.panel-left', true);
@@ -91,6 +89,9 @@ $(document).on('page:init', async function () {
   $('.user-photo')[0].src = (userData[0].photo.length == 0) ? '/venufy/assets/me.jpg' : `/venufy/Backend-API/${userPhotoPath}`;
   $('.user-names')[0].innerHTML = `${userData[0].fname} ${userData[0].lname}`;
   $('.user-contact')[0].innerHTML = `${userData[0].contact}`;
+
+  const unreadNotifications = await getUnreadNotifications(userID);
+  if (unreadNotifications.length == 0) { $('.notification-dot')[0].style.display = 'none'; }
 });
 
 
@@ -130,7 +131,7 @@ $(document).on('page:init', '.page[data-name="onboarding"]', function (e, page) 
 
 // Handling user registration
 $(document).on('page:init', '.page[data-name="signup"]', function (e, page) {
-  $('.signup-btn').on('click', async function (e) {
+  $('.signup-form').on('submit', async function (e) {
     app.preloader.show();
     e.preventDefault();
 
@@ -141,7 +142,7 @@ $(document).on('page:init', '.page[data-name="signup"]', function (e, page) {
     let Password = $('#passWord').val();
     let Contact = parseInt($('#contact').val());
 
-    let user = {
+    let userData = {
       username: Username,
       fname: Fname,
       lname: Lname,
@@ -151,7 +152,7 @@ $(document).on('page:init', '.page[data-name="signup"]', function (e, page) {
     };
 
     try {
-      const result = await createUser(user);
+      const result = await createUser(userData);
 
       let newuser = {
         username: Username,
@@ -162,13 +163,13 @@ $(document).on('page:init', '.page[data-name="signup"]', function (e, page) {
       await initDB();
       await addUser(newuser);
       app.preloader.hide();
-      app.dialog.alert('User data saved successfully!', 'Success', () => {
+      app.dialog.alert('Your account has been created successfully!', 'Success', () => {
         app.views.main.router.navigate('/login/');
       });
 
     } catch (error) {
       app.preloader.hide();
-      app.dialog.alert('Error saving data: ' + error, 'Error');
+      app.dialog.alert('Error creating user account: ' + error, 'Error');
     }
   });
 });
@@ -180,7 +181,7 @@ $(document).on('page:init', '.page[data-name="login"]', function (e, page) {
 
   $('.login-btn').on('click', async function (e) {
     app.preloader.show();
-    e.preventDefault(); // Prevent form submission refresh
+    e.preventDefault();
 
     let Username = $('#username').val();
     let Password = $('#password').val();
@@ -231,10 +232,6 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
         noItemBlock2[0].style.display = "none";
       }
 
-      if (userID == venue.owner) {
-        if (userVenues.length < 2) { userVenues.push(venue); }
-      }
-
       // Create a list item for each venue
       const listItem = document.createElement('div');
       listItem.innerHTML = `<a href="/venue/${venue.id}/${venue.owner}">
@@ -264,6 +261,7 @@ $(document).on('page:init', '.page[data-name="home"]', async function (e, page) 
   try {
 
     let venues = await fetchAllVenues();
+    const userVenues = await fetchVenuesByOwnerId(userID);
 
     // Display all venues normally
     displayVenues(venues);
@@ -466,6 +464,7 @@ $(document).on('page:init', '.page[data-name="venue-details"]', async function (
   try {
     const venue = await fetchVenueById(id);
     const images = await fetchAllImages(id);
+    const userEvents = await fetchEventsByOrganizerId(userID);
 
     if (owner == userID) {
       addEventBtn[0].style.display = "none";
@@ -782,17 +781,27 @@ async function displayEvents(events) {
 
     // Set the inner HTML for the popover
     if (userID == event.organizer) {
-      if (userEvents.length < 2) { userEvents.push(event); }
-      popover.innerHTML = `
+      if (event.status == 0) {
+        popover.innerHTML = `
         <div class="popover-inner">
             <div class="block">
                 <p class="text-align-center">${event.title}</p>
-                <a href="/payment/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px; background-color:#1F7D53; color:white;">Complete Venue Booking</a>
-                <a href="/events-update/${event.id}" class="button button-raised button-tonal" style="margin-top: 15px;">Reschedule Event</a>
+                <a href="/payment/${event.id}" class="button button-raised button-tonal popover-close" style="margin-top: 15px; background-color:#1F7D53; color:white;">Complete Venue Booking</a>
+                <a href="/events-update/${event.id}" class="button button-raised button-tonal popover-close" style="margin-top: 15px;">Reschedule Event</a>
                 <button class="button button-raised delete-event-btn" style="margin-top: 15px; color:red;"><i class="icon f7-icons">trash</i> Delete Event</button>
             </div>
-        </div>
-    `;
+        </div>`;
+      }else if (event.status == 1){
+        popover.innerHTML = `
+        <div class="popover-inner">
+            <div class="block">
+                <p class="text-align-center">${event.title}</p>
+                <a href="/events-update/${event.id}" class="button button-raised button-tonal popover-close" style="margin-top: 15px;">Reschedule Event</a>
+                <button class="button button-raised delete-event-btn" style="margin-top: 15px; color:red;"><i class="icon f7-icons">trash</i> Delete Event</button>
+            </div>
+        </div>`;
+      }
+
     } else {
       popover.innerHTML = `
         <div class="popover-inner">
@@ -810,14 +819,25 @@ async function displayEvents(events) {
 
     // Create the event list item
     const listItem = document.createElement('div');
-    listItem.innerHTML = `<a href="#" data-popover="#${popover.id}" class="item-link popover-open" style="width:100%; margin-bottom: 20px; background-color:rgb(243, 243, 243); color:#333;">
+    if (event.status == 2) {
+      listItem.innerHTML = `<span style="width:100%; margin-bottom: 20px; background-color:rgb(243, 243, 243); color:#333;">
                                 <div class="flex" style="flex-direction:column; align-items:start; width:100%; height:auto; border-left: 1px solid #333; border-bottom: 1px solid #333; border-radius: 10px; padding:5px;">
-                                  <p style="margin:1px; color:#205781;">Event Title : <span style="font-weight:bold;">${event.title}</span></p>
-                                  <p style="margin:1px; color:#205781;">Date :  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
-                                  <p style="margin:1px; color:#205781;">Organizer :  ${organizer[0].fname} ${organizer[0].lname}</p>
-                                  <p style="margin:1px; color:#205781;">Location :  ${venue[0].name}, at ${venue[0].address}</p>
+                                  <p style="margin:0.1px; color:#205781;">Event Title : <span style="font-weight:bold;">${event.title}</span></p>
+                                  <p style="margin:0.1px; color:#205781;">Date :  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
+                                  <p style="margin:0.1px; color:#205781;">Organizer :  ${organizer[0].fname} ${organizer[0].lname}</p>
+                                  <p style="margin:0.1px; color:#205781;">Location :  ${venue[0].name}, at ${venue[0].address}</p>
                                 </div>                
-                              </a>`;
+                              </span>`;
+    }else{
+      listItem.innerHTML = `<span data-popover="#${popover.id}" class="popover-open" style="width:100%; margin-bottom: 20px; background-color:rgb(243, 243, 243); color:#333;">
+                                <div class="flex" style="flex-direction:column; align-items:start; width:100%; height:auto; border-left: 1px solid #333; border-bottom: 1px solid #333; border-radius: 10px; padding:5px;">
+                                  <p style="margin:0.1px; color:#205781;">Event Title : <span style="font-weight:bold;">${event.title}</span></p>
+                                  <p style="margin:0.1px; color:#205781;">Date :  ${new Date(event.date).toLocaleDateString("en-GB")}</p>
+                                  <p style="margin:0.1px; color:#205781;">Organizer :  ${organizer[0].fname} ${organizer[0].lname}</p>
+                                  <p style="margin:0.1px; color:#205781;">Location :  ${venue[0].name}, at ${venue[0].address}</p>
+                                </div>                
+                              </span>`;
+    }
 
     listItem.setAttribute('class', 'block');
     listItem.setAttribute('style', 'margin:0px 0px 7px 0px;');
@@ -979,7 +999,7 @@ $(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
     data: {
       labels: ['Visitors', 'Bookings', 'Pending', 'Cancelled'],
       datasets: [{
-        data: [20, 45, 25, 10],
+        data: [10, 3, 2, 1],
         backgroundColor: [
           app.theme === 'ios' ? '#007aff' : app.theme === 'md' ? '#2196f3' : '#007aff', // blue
           app.theme === 'ios' ? '#34C759' : app.theme === 'md' ? '#4CAF50' : '#34C759',  // green
@@ -1005,7 +1025,7 @@ $(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
       labels: ['Visitors', 'Bookings', 'Pending', 'Cancelled'],
       datasets: [{
         label: 'Status Breakdown',
-        data: [20, 45, 25, 10],
+        data: [10, 3, 2, 1],
         backgroundColor: [
           app.theme === 'ios' ? '#007aff' : app.theme === 'md' ? '#2196f3' : '#007aff', // blue
           app.theme === 'ios' ? '#34C759' : app.theme === 'md' ? '#4CAF50' : '#34C759', // green
@@ -1049,15 +1069,76 @@ $(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
 
 
 // Notifications page
-$(document).on('page:init', '.page[data-name="notifications"]', function (e, page) {
+$(document).on('page:init', '.page[data-name="notifications"]', async function (e, page) {
+  app.preloader.show();
+
+  try {
+    const notifications = await getUserNotifications(userID);
+
+    const readNotifications = $('.read-notifications');
+    const unreadNotifications = $('.unread-notifications');
+    let notificationList;
+    let counter1 = 0;
+    let counter2 = 0;
+
+    notifications.forEach(notification => {
+      notificationList = (notification.status == 0) ? unreadNotifications : readNotifications;
+      const childElement = document.createElement('span');
+      if (notification.status == 0) {
+        counter1++;
+        childElement.innerHTML = `
+                <li style="border-bottom: 0.5px #333 solid; border-radius: 20px; margin-bottom: 10px;">
+                    <a href="#" class="item-link item-content">
+                        <div class="badge margin-right color-red">${counter1}</div>
+                        <div class="item-inner" style="display: flex; align-items: center;">
+                            <div style="position: relative;flex: 1 1 auto;min-width: 0;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;margin: 1px 0;">
+                                <div style="margin-bottom: 2px; font-weight: bold;">${notification.type}</div>
+                                <p style="margin: 0;"> ${notification.message}</p>
+                                <div style="content: '';position: absolute;top: 0; right: 0;width: 2.5em; height: 100%;pointer-events: none;background: linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0));"></div>
+                            </div>                          
+                        </div>
+                    </a>
+                </li>` ;
+      } else {
+        counter2++;
+        childElement.innerHTML = `
+                <li style="border-bottom: 0.5px #333 solid; border-radius: 20px; margin-bottom: 10px;">
+                    <a href="#" class="item-link item-content">
+                        <div class="badge margin-right color-blue">${counter2}</div>
+                        <div class="item-inner" style="display: flex; align-items: center;">
+                            <div style="position: relative;flex: 1 1 auto;min-width: 0;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;margin: 1px 0;">
+                                <div style="margin-bottom: 2px; font-weight: bold;">${notification.type}</div>
+                                <p style="margin: 0;"> ${notification.message}</p>
+                                <div style="content: '';position: absolute;top: 0; right: 0;width: 2.5em; height: 100%;pointer-events: none;background: linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0));"></div>
+                            </div>                          
+                        </div>
+                    </a>
+                </li>
+                `;
+      }
+
+      notificationList[0].appendChild(childElement);
+
+    });
+
+    app.preloader.hide();
+
+  }
+  catch (error) {
+    app.preloader.hide();
+    app.dialog.alert('Error retrieving notifications: ' + error, 'Error');
+  }
 
 });
 
 
 // Payment page
-$(document).on('page:init', '.page[data-name="payment"]', function (e, page) {
+$(document).on('page:init', '.page[data-name="payment"]', async function (e, page) {
 
   let { id } = page.route.params;  // the event's id
+  const event = await fetchEventById(id);
+  const venue = await fetchVenueById(event[0].venueId);
+  const venueOwner = await fetchUserById(venue[0].owner);
 
   let paymentForm = $('.payment-form');
 
@@ -1065,20 +1146,29 @@ $(document).on('page:init', '.page[data-name="payment"]', function (e, page) {
     e.preventDefault();
     app.preloader.show();
 
-    let paymentMethod = $('#payment-method').val();
-    let amount = $('#amount').val();
+    let amountToPay = venue[0].pricing;
+    let payerNumber = $('.payer-number').val();
 
-    const payment = {
+    const paymentData = {
+      amount: 500,
+      phone: payerNumber,
+      email: userData[0].email,
+      eventOrganizerId: userID,
+      eventOrganizerName: `${userData[0].fname} ${userData[0].lname}`,
       eventId: id,
-      method: paymentMethod,
-      amount: amount
+      message: "Payment for order a venue reservation on Venufy",
+      eventTitle: event[0].title,
+      eventDate: new Date(event[0].date).toLocaleDateString("en-GB"),
+      venueId: event[0].venueId,
+      venueName: venue[0].name,
+      venueOwnerEmail: venueOwner[0].email
     };
 
     try {
-      await testPayment();
+      await promptingUserToPay(paymentData);
       app.preloader.hide();
-      app.dialog.alert('Payment was successful!', 'Success', () => {
-        app.views.main.router.navigate('/home/');
+      app.dialog.alert('Your event has been registered successfully', 'Success', () => {
+        app.views.main.router.navigate('/all-events/');
       });
     } catch (error) {
       app.preloader.hide();

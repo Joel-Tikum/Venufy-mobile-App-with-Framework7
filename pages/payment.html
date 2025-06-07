@@ -19,32 +19,27 @@
         </div>
 
         <!-- Page Content -->
-        <div class="page-content" style="background-color: rgb(255, 210, 7);">
+        <div class="page-content" style="">
 
             <!-- Reservation Info -->
-            <div class="block">
-                <p style="text-align: center; font-size: 18px; color: #034C53;">
+            <div class="block" style="margin: 0px; padding: 10px;">
+                <p style="text-align: center; font-size: 18px; color: #272929; font-weight: bold;">
                     Reserving your space at <span>Party Hub, at Molyko - Buea</span>
                 </p>
             </div>
 
-            <!-- MTN MoMo Logo -->
-            <div class="block" style="display: flex; justify-content: center;">
-                <img src="/venufy/assets/MOMO.jpg" alt="MTN Mobile Money" class="col-100" />
-            </div>
-
             <!-- Warning & Amount -->
-            <div class="block" style="font-size: 17px; text-align: center; color: #034C53;">
+            <div class="block" style="font-size: 17px; text-align: center; color:#272929; ; margin: 10px 0;">
                 <p>
                     Please ensure you have enough balance as this transaction will incur
                     charges. Also, be ready to confirm the transaction on your phone.
                 </p>
                 <p class="margin-top">
                     <strong>Amount to pay : </strong>
-                    <span class="venue-price" style="font-size: large; font-weight: bold;">  5000.00 XAF</span>
+                    <span class="venue-price" style="font-size: large; font-weight: bold;color: #034C53;"> 5000.00 XAF</span>
                 </p>
             </div>
-
+            
             <form class="payment-form">
 
                 <!-- MoMo Number Input -->
@@ -52,9 +47,9 @@
                     <ul>
                         <li class="item-content item-input">
                             <div class="item-inner" style="background: transparent;">
-                                <div class="item-title item-label" style="font-size: 15px; color: #034C53;">Your MoMo Number :</div>
+                                <div class="item-title item-label" style="font-size: 15px; color: #272929;;">Payer Number</div>
                                 <div class="item-input-wrap">
-                                    <input type="tel" placeholder="" validate required />
+                                    <input type="tel" class="payer-number" pattern="^[0-9]{9}$" placeholder="677112233" validate required />
                                 </div>
                             </div>
                         </li>
@@ -62,8 +57,8 @@
                 </div>
 
                 <!-- Save Button -->
-                <div class="block">
-                    <button type="submit" class="button button-fill button-large">
+                <div class="block" style="margin: 20px 0px;">
+                    <button type="submit" class="button button-fill button-large" style="font-size: larger; font-weight: bold;">
                         Make Payment
                     </button>
                 </div>

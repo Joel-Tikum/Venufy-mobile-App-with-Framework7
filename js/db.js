@@ -2,6 +2,7 @@
 let db;
 const base_URL = 'http://localhost:3000';
 
+
 export function initDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('venufyDB', 1);
@@ -37,9 +38,7 @@ export function addUser(user) {
     const objectStore = transaction.objectStore('users_store');
     const request = objectStore.add(user);
 
-    request.onsuccess = function () {
-      resolve();
-    };
+    request.onsuccess = function () { resolve(); };
 
     request.onerror = function (event) {
       console.error('Add user error:', event.target.errorCode);
@@ -48,15 +47,15 @@ export function addUser(user) {
   });
 }
 
-// Add user into the MySQL database
-export async function createUser(user) {
+// Register a new user
+export async function createUser(userData) {
   try {
     const response = await fetch(`${base_URL}/users/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(user),
+      body: JSON.stringify(userData),
     });
     const result = await response.json();
     return result;
@@ -166,6 +165,25 @@ export async function fetchVenueById(venueId) {
     }
     const venue = await response.json();
     return venue;
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+    // Optionally, rethrow the error or return a default value
+    throw error;
+  }
+}
+
+
+// Fetching venues by a userId
+export async function fetchVenuesByOwnerId(userId) {
+  try {
+    const response = await fetch(`${base_URL}/venues/user-venues/${userId}`);
+    if (!response.ok) {
+      // Extract error message from the response body
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Network response was not ok');
+    }
+    const venues = await response.json();
+    return venues;
   } catch (error) {
     console.error('There was a problem with the fetch operation:', error);
     // Optionally, rethrow the error or return a default value
@@ -325,6 +343,44 @@ export async function fetchEventsByVenueId(venueId) {
 }
 
 
+// Fetching all events for a specific venue
+export async function fetchEventById(eventId) {
+  try {
+    const response = await fetch(`${base_URL}/events/event/${eventId}`);
+    if (!response.ok) {
+      // Extract error message from the response body
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Network response was not ok');
+    }
+    const events = await response.json();
+    return events;
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+    // Optionally, rethrow the error or return a default value
+    throw error;
+  }
+}
+
+
+// Fetching all events for a specific user
+export async function fetchEventsByOrganizerId(userId) {
+  try {
+    const response = await fetch(`${base_URL}/events/user-events/${userId}`);
+    if (!response.ok) {
+      // Extract error message from the response body
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Network response was not ok');
+    }
+    const events = await response.json();
+    return events;
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+    // Optionally, rethrow the error or return a default value
+    throw error;
+  }
+}
+
+
 // Deleting event by eventId
 export async function deleteEventById(eventId) { 
   try {
@@ -383,15 +439,10 @@ export async function getUserNotifications(userId) {
 }
 
 
-
-
-
-
-
-// testing the payment API
-export async function testPayment() {
+// Get user's unread notifications
+export async function getUnreadNotifications(userId) {
   try {
-    const response = await fetch(`${base_URL}/venufy-payments`);
+    const response = await fetch(`${base_URL}/notifications/unread/${userId}`);
     if (!response.ok) {
       // Extract error message from the response body
       const errorData = await response.json();
@@ -402,6 +453,48 @@ export async function testPayment() {
   } catch (error) {
     console.error('There was a problem with the fetch operation:', error);
     // Optionally, rethrow the error or return a default value
+    throw error;
+  }
+}
+
+
+// Mark notification as read
+export async function markNotificationAsRead(notificationId) {
+  try {
+    const response = await fetch(`${base_URL}/notifications/mark-read/${notificationId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    throw error;
+  }
+}
+
+
+
+
+
+
+
+// Prompting user to make payment
+export async function promptingUserToPay(paymentData) { 
+  try {
+    const response = await fetch(`${base_URL}/payment/prompt-user-to-pay`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(paymentData),
+    });
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error prompting payment:', error);
     throw error;
   }
 }
