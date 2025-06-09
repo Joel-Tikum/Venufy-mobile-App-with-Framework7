@@ -6,7 +6,9 @@ import mysql from 'mysql2';
 import mysql1 from 'mysql2/promise';
 import multer from 'multer';
 import path from 'path';
+
 // const fs = require("fs");
+
 import fs1 from 'fs/promises';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
