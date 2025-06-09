@@ -28,6 +28,10 @@ app.use(express.json()); // For parsing application/json
 // Serve static files from the images directory (optional: to access images via URL)
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
+app.get('/', (req, res) => {
+  res.send('Welcome to the Venufy API!');
+});
+
 // Configure multer for file uploads
 const venue_storage = multer.diskStorage({
   destination: function (req, file, cb) {
