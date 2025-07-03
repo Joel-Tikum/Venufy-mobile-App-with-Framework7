@@ -19,7 +19,7 @@ import fapshi from './fapshi.js';
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -29,10 +29,6 @@ app.use(express.json()); // For parsing application/json
 
 // Serve static files from the images directory (optional: to access images via URL)
 app.use('/images', express.static(path.join(__dirname, 'images')));
-
-app.get('/', (req, res) => {
-  res.send('Welcome to the Venufy API!');
-});
 
 // Configure multer for file uploads
 const venue_storage = multer.diskStorage({
@@ -85,7 +81,7 @@ pool.getConnection((err, connection) => {
   if (err) {
     console.error('Error connecting to the database:', err);
   } else {
-    console.log('Connected to the MySQL database');
+    console.log('Successfully onnected to the database');
     connection.release();
   }
 });

@@ -1022,21 +1022,23 @@ $(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
   new Chart(barchart, {
     type: 'bar',
     data: {
-      labels: ['Visitors', 'Bookings', 'Pending', 'Cancelled'],
+      labels: ['Nov', 'Jan', 'Feb', 'Mar', 'Apr'],
       datasets: [{
-        label: 'Status Breakdown',
-        data: [10, 3, 2, 1],
+        label: '',
+        data: [10, 4, 2, 1, 6],
         backgroundColor: [
-          app.theme === 'ios' ? '#007aff' : app.theme === 'md' ? '#2196f3' : '#007aff', // blue
           app.theme === 'ios' ? '#34C759' : app.theme === 'md' ? '#4CAF50' : '#34C759', // green
+          app.theme === 'ios' ? '#007aff' : app.theme === 'md' ? '#2196f3' : '#007aff', // blue
           app.theme === 'ios' ? '#8E8E93' : app.theme === 'md' ? '#9E9E9E' : '#8E8E93', // gray
           app.theme === 'ios' ? '#ff3b30' : app.theme === 'md' ? '#f44336' : '#ff3b30', // red
+          app.theme === 'ios' ? '#34C759' : app.theme === 'md' ? '#4CAF50' : '#34C759', // green
         ],
         borderColor: [
           app.theme === 'ios' ? '#0051c7' : app.theme === 'md' ? '#1976d2' : '#0051c7',
           app.theme === 'ios' ? '#28a745' : app.theme === 'md' ? '#388e3c' : '#28a745',
           app.theme === 'ios' ? '#6e6e73' : app.theme === 'md' ? '#757575' : '#6e6e73',
-          app.theme === 'ios' ? '#c12f2f' : app.theme === 'md' ? '#d32f2f' : '#c12f2f',
+          app.theme === 'ios' ? '#6e6e73' : app.theme === 'md' ? '#757575' : '#6e6e73',
+          app.theme === 'ios' ? '#0051c7' : app.theme === 'md' ? '#1976d2' : '#0051c7',
         ],
         borderWidth: 1
       }]
@@ -1046,19 +1048,26 @@ $(document).on('page:init', '.page[data-name="dashboard"]', function (e, page) {
         x: {
           title: {
             display: true,
-            text: 'Category'
+            text: 'Months'
           }
         },
         y: {
           beginAtZero: true,
           title: {
             display: true,
-            text: 'Count'
+            text: 'Booking Rate'
           }
         }
       },
       plugins: {
         legend: { display: false },
+        title: {
+          display: true,
+          text: 'Monthly Booking Statistics',
+          font: {
+            size: 20
+          }
+        },
         tooltip: { enabled: true }
       }
     }

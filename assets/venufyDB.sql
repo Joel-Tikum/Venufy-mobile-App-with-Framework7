@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 24, 2025 at 04:19 AM
+-- Generation Time: Jun 10, 2025 at 03:48 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,14 +38,6 @@ CREATE TABLE `v_events` (
   `created_on` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `v_events`
---
-
-INSERT INTO `v_events` (`id`, `venueId`, `organizer`, `title`, `description`, `date`, `status`, `created_on`) VALUES
-(53, 51, 20, 'Birthday Party', 'My twenty-forth birthday celebration', '2025-10-17', 0, '2025-05-03 05:39:18'),
-(63, 51, 20, 'New Event', 'New Event', '2025-05-13', 0, '2025-05-12 19:44:59');
-
 -- --------------------------------------------------------
 
 --
@@ -58,20 +50,6 @@ CREATE TABLE `v_images` (
   `image` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `v_images`
---
-
-INSERT INTO `v_images` (`id`, `venueId`, `image`) VALUES
-(64, 47, 'images\\venues\\1745668923448-630846307.jfif'),
-(65, 47, 'images\\venues\\1745669003568-924585302.jfif'),
-(66, 48, 'images\\venues\\1745669306252-509911872.jfif'),
-(67, 48, 'images\\venues\\1745669330245-653747533.jfif'),
-(70, 51, 'images\\venues\\1745929516262-294605303.jfif'),
-(71, 51, 'images\\venues\\1746092460205-431628756.jfif'),
-(72, 51, 'images\\venues\\1746092483258-140599512.jfif'),
-(73, 47, 'images\\venues\\1746095811210-618185023.jfif');
-
 -- --------------------------------------------------------
 
 --
@@ -80,7 +58,7 @@ INSERT INTO `v_images` (`id`, `venueId`, `image`) VALUES
 
 CREATE TABLE `v_notifications` (
   `id` int(11) NOT NULL,
-  `initiator_id` int(11) NOT NULL,
+  `initiator_id` int(11) DEFAULT NULL,
   `receiver_id` int(11) NOT NULL,
   `type` text NOT NULL,
   `message` text NOT NULL,
@@ -89,12 +67,22 @@ CREATE TABLE `v_notifications` (
   `status` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `v_notifications`
+-- Table structure for table `v_transactions`
 --
 
-INSERT INTO `v_notifications` (`id`, `initiator_id`, `receiver_id`, `type`, `message`, `created_on`, `expires_on`, `status`) VALUES
-(1, 22, 20, 'Comment', 'Your are doing well Joel Tikum', '2025-05-11 12:16:28', '2025-05-31 12:14:10', 0);
+CREATE TABLE `v_transactions` (
+  `id` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL,
+  `venue_id` int(11) NOT NULL,
+  `payer_id` int(11) NOT NULL,
+  `trans_id` varchar(50) NOT NULL,
+  `trans_type` tinytext NOT NULL,
+  `amount` int(11) NOT NULL,
+  `date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -110,14 +98,6 @@ CREATE TABLE `v_users` (
   `contact` int(25) NOT NULL,
   `photo` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `v_users`
---
-
-INSERT INTO `v_users` (`id`, `fname`, `lname`, `email`, `contact`, `photo`) VALUES
-(20, 'Joel', 'Tikum', 'joeltikum646@gmail.com', 652480055, 'images\\users\\1746064967837-491426464.jpeg'),
-(22, 'Nzume', 'Jude', 'sonlion@gmail.com', 652153995, 'images\\users\\1746065689832-485519043.jpeg');
 
 -- --------------------------------------------------------
 
@@ -136,15 +116,6 @@ CREATE TABLE `v_venues` (
   `status` int(11) NOT NULL DEFAULT 0,
   `owner` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `v_venues`
---
-
-INSERT INTO `v_venues` (`id`, `name`, `address`, `capacity`, `pricing`, `description`, `image`, `status`, `owner`) VALUES
-(47, 'H\'S Party Hall', 'Molyko - Buea', 500, 100000, 'M\'S Party Hall is a multipurpose hall, with several amenities, some of which include an AC, external water closet with constant water supply and a standby generator. We also offer decoration services optionally.', 'images\\venues\\1745668923448-630846307.jfif', 0, 20),
-(48, 'King\'s Party Hub', 'City Chemist - Bamenda', 200, 50000, 'King\'s Party Hub is a multipurpose hall, with several amenities, some of which include an AC, external water closet with constant water supply and a standby generator. We also offer decoration services optionally.', 'images\\venues\\1745669306252-509911872.jfif', 0, 20),
-(51, 'Party Ven', 'Kumba', 500, 10000, 'A great choice', 'images\\venues\\1745929516262-294605303.jfif', 0, 22);
 
 --
 -- Indexes for dumped tables
@@ -173,6 +144,12 @@ ALTER TABLE `v_notifications`
   ADD KEY `Deleting an account also deletes all the notifications` (`receiver_id`);
 
 --
+-- Indexes for table `v_transactions`
+--
+ALTER TABLE `v_transactions`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `v_users`
 --
 ALTER TABLE `v_users`
@@ -193,7 +170,7 @@ ALTER TABLE `v_venues`
 -- AUTO_INCREMENT for table `v_events`
 --
 ALTER TABLE `v_events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- AUTO_INCREMENT for table `v_images`
@@ -205,13 +182,19 @@ ALTER TABLE `v_images`
 -- AUTO_INCREMENT for table `v_notifications`
 --
 ALTER TABLE `v_notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `v_transactions`
+--
+ALTER TABLE `v_transactions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `v_users`
 --
 ALTER TABLE `v_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `v_venues`
